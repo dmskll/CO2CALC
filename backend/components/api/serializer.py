@@ -1,4 +1,4 @@
-from ..models import Component, ComponentUsage, ComponentList
+from ..models import Component, ComponentUsage, Calculation
 from rest_framework import serializers
 
 
@@ -13,10 +13,10 @@ class ComponentUsageSerializer(serializers.ModelSerializer):
         model = ComponentUsage
         fields = '__all__' #definimos los campos que queremos transportat
 
-class ComponentListSerializer(serializers.ModelSerializer):
+class CalculationSerializer(serializers.ModelSerializer):
     component_usage = ComponentUsageSerializer(many=True, read_only=True)
     class Meta:
-        model = ComponentList
+        model = Calculation
         fields = '__all__' #definimos los campos que queremos transportat
 
 

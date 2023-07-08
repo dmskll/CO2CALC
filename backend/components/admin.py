@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Component, ComponentUsage, ComponentList
+from .models import Component, ComponentUsage, Calculation
 
 
 
@@ -14,4 +14,4 @@ class ComponentAdmin (admin.ModelAdmin):
 admin.site.register(Component, ComponentAdmin)
 # admin.site.register(CustomComponent, ComponentAdmin)
 admin.site.register(ComponentUsage)
-admin.site.register(ComponentList)
+admin.site.register(Calculation)

@@ -52,22 +52,27 @@ class Component(models.Model):
         else:
             return f"Custom {self.name} by {self.owner.username}"
         
-class ComponentList(models.Model):
+class Calculation(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL,
                               on_delete=models.CASCADE,)
     name                    = models.CharField(max_length=30)
-
+    
+    def __str__(self):
+        return f"{self.name} by {self.owner.username} "
 
 class ComponentUsage(models.Model):
     component = models.ForeignKey(Component,
                                   on_delete=models.CASCADE,)
-    list = models.ForeignKey(ComponentList,
+    calculation = models.ForeignKey(Calculation,
                              on_delete=models.CASCADE, 
                              related_name="usage")  
     hours                   = models.IntegerField(validators=[MinValueValidator(0)])
     use                     = models.IntegerField(validators=[MinValueValidator(0),
                                                               MaxValueValidator(100)])
     Description             = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return f" Component {self.component.name} used by {self.owner.username} "
 
 
         
