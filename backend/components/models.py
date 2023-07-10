@@ -54,7 +54,8 @@ class Component(models.Model):
         
 class Calculation(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL,
-                              on_delete=models.CASCADE,)
+                              on_delete=models.CASCADE,
+                              related_name="calculation")
     name                    = models.CharField(max_length=30)
     
     def __str__(self):
@@ -62,7 +63,8 @@ class Calculation(models.Model):
 
 class ComponentUsage(models.Model):
     component = models.ForeignKey(Component,
-                                  on_delete=models.CASCADE,)
+                                  on_delete=models.CASCADE,
+                                  related_name="usage")
     calculation = models.ForeignKey(Calculation,
                              on_delete=models.CASCADE, 
                              related_name="usage")  
