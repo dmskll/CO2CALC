@@ -5,6 +5,7 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.generics import get_object_or_404
+from rest_framework.exceptions import PermissionDenied
 
 from rest_framework import permissions
 from components.api.permissions import IsAdminUserOrReadOnly, IsOwner
@@ -12,22 +13,6 @@ from components.api.permissions import IsAdminUserOrReadOnly, IsOwner
 from ..models import Component, ComponentUsage, Calculation
 from .serializer import ComponentSerializer, ComponentUsageSerializer, CalculationSerializer
 
-class ComponentViewSet(viewsets.ModelViewSet):
-    queryset = Component.objects.all()
-    serializer_class = ComponentSerializer
-
-class ComponentViewSet(viewsets.ModelViewSet):
-    queryset = Component.objects.all()
-    serializer_class = ComponentSerializer
-
-
-class ComponentUsageViewSet(viewsets.ModelViewSet):
-    queryset = ComponentUsage.objects.all()
-    serializer_class = ComponentUsageSerializer
-
-# class CalculationViewSet(viewsets.ModelViewSet):
-#     queryset = Calculation.objects.all()
-#     serializer_class = CalculationSerializer
 
 
 class ComponentDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
@@ -61,7 +46,20 @@ class ComponentUsageDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ComponentUsageSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    #user
+    # Component usage no tiene el atributo de owner, por eso se comprueba accediendo al owner
+    # del calculo al que pertenece.
+    def get_queryset(self):
+        if self.request.user.is_authenticated:
+            usage_pk = self.kwargs.get("pk")
+            usage = get_object_or_404(ComponentUsage, pk=usage_pk) 
+            calculation = get_object_or_404(Calculation, pk=usage.calculation.id)
+
+
+            if calculation.owner != self.request.user:
+                raise PermissionDenied({"detail":"You do not have permission to perform this action."})
+
+            return ComponentUsage.objects.filter(id=usage_pk)
+        
 
 class ComponentUsageListCreateAPIView(generics.ListCreateAPIView):
     queryset = ComponentUsage.objects.all()
@@ -75,7 +73,21 @@ class ComponentUsageListCreateAPIView(generics.ListCreateAPIView):
         owner = self.request.user
         
         serializer.save(calculation=calc, owner = owner)
-    #user
+
+    def get_queryset(self):
+        if self.request.user.is_authenticated:
+            calc_pk = self.kwargs.get("calc_pk")
+            calc = get_object_or_404(Calculation, pk=calc_pk) 
+            
+            if calc.owner != self.request.user:
+                raise PermissionDenied({"detail":"You do not have permission to perform this action."})
+
+            return ComponentUsage.objects.filter(calculation=calc)
+        
+        else:
+            raise PermissionDenied({"detail":"Authentication credentials were not provided."})
+
+    
     
 class CalculationDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Calculation.objects.all()
@@ -84,10 +96,18 @@ class CalculationDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     
 
 class CalculationListCreateAPIView(generics.ListCreateAPIView):
-    queryset = Calculation.objects.all()
     serializer_class = CalculationSerializer
     permission_classes = [IsOwner]
 
+    def get_queryset(self):
+        if self.request.user.is_authenticated:
+            return Calculation.objects.filter(owner=self.request.user)
+        else:
+            return Calculation.objects.none()
+    
+    def perform_create(self, serializer):        
+        owner = self.request.user
+        serializer.save(owner = owner)
     
 
 # class CalculationViewSet(APIView):
@@ -104,3 +124,21 @@ class CalculationListCreateAPIView(generics.ListCreateAPIView):
 #             serializer.save()
 #             return Response(serializer.data, status=status.HTTP_201_CREATED)
 #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  
+
+
+# class ComponentViewSet(viewsets.ModelViewSet):
+#     queryset = Component.objects.all()
+#     serializer_class = ComponentSerializer
+
+# class ComponentViewSet(viewsets.ModelViewSet):
+#     queryset = Component.objects.all()
+#     serializer_class = ComponentSerializer
+
+
+# class ComponentUsageViewSet(viewsets.ModelViewSet):
+#     queryset = ComponentUsage.objects.all()
+#     serializer_class = ComponentUsageSerializer
+
+# class CalculationViewSet(viewsets.ModelViewSet):
+#     queryset = Calculation.objects.all()
+#     serializer_class = CalculationSerializer
