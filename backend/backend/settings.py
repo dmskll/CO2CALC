@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import os 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -38,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'components',
+    'login',
     'rest_framework',
     'rest_framework.authtoken'
 ]
@@ -129,6 +131,18 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     )
 }
+
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+LOGIN_REDIRECT_URL = "/admin/"
+
+SESAME_MAX_AGE = 300  # 300 seconds = 5 minutes
+
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "sesame.backends.ModelBackend",
+]
 
 
 
