@@ -15,10 +15,14 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
+from core.views import IndexTemplateView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('components.api.urls')),
-    path('api-auth/', include('rest_framework.urls'))
+    path('api-auth/', include('rest_framework.urls')),
+
+    re_path(r"^.*$", IndexTemplateView.as_view(), name="app-entry-point")
 ]
+#re_path marca todos los posibles paths y los enruta al index de vue
