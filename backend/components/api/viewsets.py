@@ -8,7 +8,7 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.exceptions import PermissionDenied
 
 from rest_framework import permissions
-from components.api.permissions import IsAdminUserOrReadOnly, IsOwner
+from components.api.permissions import IsAdminUserOrReadOnly, IsOwner, ComponentIsOwner
 
 from ..models import Component, ComponentUsage, Calculation
 from .serializer import ComponentSerializer, ComponentUsageSerializer, CalculationSerializer
@@ -18,7 +18,7 @@ from .serializer import ComponentSerializer, ComponentUsageSerializer, Calculati
 class ComponentDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Component.objects.all()
     serializer_class = ComponentSerializer
-    permission_classes = [IsOwner]
+    permission_classes = [ComponentIsOwner]
 
 class ComponentListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = ComponentSerializer
