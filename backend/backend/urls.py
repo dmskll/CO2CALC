@@ -16,11 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include, re_path
-from core.views import IndexTemplateView
+from core.views import IndexTemplateView, CurrentUserView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('components.api.urls')),
+    path('api/user/', CurrentUserView.as_view(), name="get-user"),
     path('api-auth/', include('rest_framework.urls')),
 
     re_path(r"^.*$", IndexTemplateView.as_view(), name="app-entry-point")

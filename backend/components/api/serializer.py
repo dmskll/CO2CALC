@@ -12,6 +12,7 @@ class ComponentSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ComponentUsageSerializer(serializers.ModelSerializer):
+    calculation = serializers.PrimaryKeyRelatedField(read_only=True)
     class Meta:
         model = ComponentUsage
         fields = '__all__' #definimos los campos que queremos transportat

@@ -5,6 +5,7 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.generics import get_object_or_404
+from django.shortcuts import get_list_or_404
 from rest_framework.exceptions import PermissionDenied
 
 from rest_framework import permissions
@@ -12,7 +13,7 @@ from components.api.permissions import IsAdminUserOrReadOnly, IsOwner, Component
 
 from ..models import Component, ComponentUsage, Calculation
 from .serializer import ComponentSerializer, ComponentUsageSerializer, CalculationSerializer
-
+import json
 
 
 class ComponentDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
@@ -26,7 +27,7 @@ class ComponentListCreateAPIView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):        
         owner = self.request.user
-        system = self.request.user.is_superuser
+        system = self.request.usejsonr.is_superuser
         serializer.save(owner = owner, system_component = system)
 
     def get_queryset(self):
@@ -47,7 +48,7 @@ class ComponentUsageDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     # Component usage no tiene el atributo de owner, por eso se comprueba accediendo al owner
-    # del calculo al que pertenece.
+    # del calculo al que pertenecjsone.
     def get_queryset(self):
         if self.request.user.is_authenticated:
             usage_pk = self.kwargs.get("pk")
@@ -64,15 +65,14 @@ class ComponentUsageDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
 class ComponentUsageListCreateAPIView(generics.ListCreateAPIView):
     queryset = ComponentUsage.objects.all()
     serializer_class = ComponentUsageSerializer
-    permission_classes = [IsOwner]
+    #permission_classes = [IsOwner]
 
     def perform_create(self, serializer):
         calc_pk = self.kwargs.get("calc_pk")
         calc = get_object_or_404(Calculation, pk=calc_pk)
         
-        owner = self.request.user
         
-        serializer.save(calculation=calc, owner = owner)
+        serializer.save(calculation=calc)
 
     def get_queryset(self):
         if self.request.user.is_authenticated:
@@ -108,7 +108,57 @@ class CalculationListCreateAPIView(generics.ListCreateAPIView):
     def perform_create(self, serializer):        
         owner = self.request.user
         serializer.save(owner = owner)
-    
+
+class CalculationData(APIView):
+    def get(self, request, calc_pk2):
+
+        #calc_pk = self.kwargs.get("calc_pk2")
+        user = request.user
+        calc = get_object_or_404(Calculation, pk=calc_pk2)
+
+        if calc.owner == user:
+            usages = get_list_or_404(ComponentUsage, calculation=calc_pk2)
+            print(usages[0].use)
+            component_uses = {}
+            for use in usages:
+                json_use = {
+                    "id": use.id,
+                    "calculation": use.calculation.id,
+                    "hours": use.hours,
+                    "use": use.use,
+                    "Description": use.Description,
+                    "component": use.component.id
+                }
+                if use.component.id in component_uses:
+                    component_uses[use.component.id]["usage"].append(json_use)
+                else:
+                    component_uses[use.component.id] = {
+                        "id": use.component.id,
+                        "owner": use.component.owner,
+                        "system_component": use.component.system_component,
+                        "name": use.component.name,
+                        "description": use.component.description,
+                        "idle_power": use.component.idle_power,
+                        "bad_case_idle_power": use.component.bad_case_idle_power,
+                        "good_case_idle_power": use.component.good_case_idle_power,
+                        "max_power": use.component.max_power,
+                        "bad_case_max_power": use.component.bad_case_max_power,
+                        "good_case_max_power": use.component.good_case_max_power,
+                        "cfp": use.component.cfp,
+                        "cfp_use_phase": use.component.cfp_use_phase,
+                        "cfp_deviation_standard": use.component.cfp_deviation_standard,
+                        "usage": []
+                    }
+                    component_uses[use.component.id]["usage"] = [json_use]
+
+            json_data = json.dumps(component_uses, indent=4, default=str, sort_keys=True, ensure_ascii=False)
+            print(json_data)
+            return Response({ json_data })
+        #en caso de que no esté loggeado
+        return Response({
+            'authenticated': False
+        })
+        
 
 # class CalculationViewSet(APIView):
     

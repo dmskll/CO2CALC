@@ -26,6 +26,9 @@ const handleSelect = (key, keyPath) => {
   else if (key == 2) {
     router.push("/info");
   } 
+  else if (key == 3) {
+    window.open("http://127.0.0.1:8000/api-auth/login/");
+  } 
 };
 </script>
 

@@ -1,8 +1,8 @@
 from django.urls import include, path
 from rest_framework import routers
 
-from .viewsets import CalculationDetailAPIView, CalculationListCreateAPIView
-from .viewsets import ComponentUsageDetailAPIView, ComponentUsageListCreateAPIView 
+from .viewsets import CalculationDetailAPIView, CalculationListCreateAPIView, CalculationData
+from .viewsets import ComponentUsageDetailAPIView, ComponentUsageListCreateAPIView
 from .viewsets import ComponentListCreateAPIView, ComponentDetailAPIView, SystemComponentListAPIView
 
 # router = routers.DefaultRouter()
@@ -21,7 +21,8 @@ urlpatterns = [
         
         path("calculation/", CalculationListCreateAPIView.as_view(), name="calculation-list"),
         path("calculation/<int:pk>/", CalculationDetailAPIView.as_view(), name="calculation-detail"),
-        path("calculation/<int:calc_pk>/usage", ComponentUsageListCreateAPIView.as_view(), name="usage-list"),
+        path("calculation/<int:calc_pk>/usage/", ComponentUsageListCreateAPIView.as_view(), name="usage-list"),
+        path("calculation/<int:calc_pk2>/data/", CalculationData.as_view(), name="calculation-data"),
         
         path("usage/<int:pk>", ComponentUsageDetailAPIView.as_view(), name="usage-detail")
 ]
