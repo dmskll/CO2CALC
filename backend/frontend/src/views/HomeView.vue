@@ -4,11 +4,11 @@
   
     <h2>Home page!</h2>
     <button v-on:click="getComponents">load components</button>
-    <div v-for="component_data in components_data" :key="component_data.pk">
+    <div v-for="usage in usage_data" :key="usage.pk">
       <div class="hw-collapse">
         <el-collapse>
-          <el-collapse-item :title="component_data.name" >
-            <HWComponent :data="component_data" />
+          <el-collapse-item :title="usage.name" >
+            <ComponentColapse :data="usage" />
           </el-collapse-item>
         </el-collapse>
       </div> 
@@ -19,16 +19,19 @@
 <script>
 
 import { axios } from "@/common/api.service.js"
-import HWComponent from "@/components/HWComponent.vue"
+import ComponentColapse from "@/components/ComponentColapse.vue"
 
 export default {
   name: "HomeView",
   data() {
     return {
-      components_data: [],
+      components_data: {
+        system: [],
+        user: [],
+      },
       calculations_data: [],
       usage_data: [],
-      jsonData: []
+      current_calculation: 0
 
     }
   },
@@ -36,47 +39,59 @@ export default {
 
   },
   components: {
-    HWComponent
+    ComponentColapse
   },
   methods: {
 
     async getCalculations() {
-      this.jsonData = {};
       let endpoint = "/api/calculation/";
       try {
         const response = await axios.get(endpoint);
-        this. calculations_data = response.data;
+        this.calculations_data = response.data;
+        console.log(this.calculations_data);
       } catch (error) {
-        //console.log(error.response);
+        alert(error.response.statusText);
+      }
+      this.getCalculationComponents();
+    },
+    getCalculationComponents() {
+      this.calculations_data.forEach( async (calculation) => {
+        let endpoint = "/api/calculation/" + calculation.id + "/data/";
+        try {
+          const response = await axios.get(endpoint);
+          this.usage_data = JSON.parse(response.data); 
+          console.log(response.data);
+        } catch (error) {
+          console.log("error")
+          alert(error.response.statusText);
+        }
+      });
+    },
+    async getComponents() {
+
+      let endpoint = "/api/component/system/";
+      try {
+        const response = await axios.get(endpoint);
+        this.components_data.system = response.data;
+      } catch (error) {
         alert(error.response.statusText);
       }
 
-
-      //poner try catch
-      this.calculations_data.forEach( async (calculation) => {
-        
-        
-        //console.log(calculation);
-        let endpoint = "/api/calculation/" + calculation.id + "/usage/";
+      endpoint = "/api/component/";
+      try {
         const response = await axios.get(endpoint);
-        //console.log(endpoint)
-        //console.log(response.data);
-        
-        let data = response.data;
-        this.jsonData[calculation.id] = {
-          id: calculation.id,
-          name: calculation.name,
-          owner: calculation.owner,
-          usage: data,
-        }  
-      });
-
-      console.log(this.jsonData);
+        this.components_data.user = response.data;
+      } catch (error) {
+        alert(error.response.statusText);
+      }
+      //console.log(this.components_data);
     }
       
   },
   created() {
+    this.getComponents()
     this.getCalculations();
+    
   }
 
 }

@@ -3,6 +3,7 @@ from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework import generics
 from rest_framework.response import Response
+from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.generics import get_object_or_404
 from django.shortcuts import get_list_or_404
@@ -153,7 +154,7 @@ class CalculationData(APIView):
 
             json_data = json.dumps(component_uses, indent=4, default=str, sort_keys=True, ensure_ascii=False)
             print(json_data)
-            return Response({ json_data })
+            return Response(json_data)
         #en caso de que no esté loggeado
         return Response({
             'authenticated': False
