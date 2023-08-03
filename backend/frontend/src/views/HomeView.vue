@@ -7,7 +7,7 @@
       <div class="hw-collapse">
         <el-collapse>
           <el-collapse-item :title="usage.name" >
-            <ComponentColapse :data="usage" :calculation_id="3"/>
+            <ComponentColapse :user="user" :data="usage" :calculation_id="3"/>
           </el-collapse-item>
         </el-collapse>
       </div> 
@@ -31,18 +31,48 @@ export default {
       calculations_data: [],
       usage_data: [],
       current_calculation: 0
-
     }
   },
-  propos: {
-
-  },
+  props: ["user"],
   components: {
     ComponentColapse
   },
   methods: {
 
     async getCalculations() {
+      if(!this.user.authenticated){
+        console.log("no calculos")
+        this.usage_data = {
+          "5": {
+              "bad_case_idle_power": "3.00",
+              "bad_case_max_power": "3.00",
+              "cfp": "3.00",
+              "cfp_deviation_standard": "3.00",
+              "cfp_use_phase": "3.00",
+              "description": "hehe",
+              "good_case_idle_power": "3.00",
+              "good_case_max_power": "3.00",
+              "id": 5,
+              "idle_power": "3.00",
+              "max_power": "3.00",
+              "name": "pc dani",
+              "owner": "dani",
+              "system_component": "false",
+              "usage": [
+                  {
+                      "Description": "programación backend",
+                      "calculation": "3",
+                      "component": "5",
+                      "hours": "150",
+                      "id": "-1",
+                      "use": "50"
+                  }
+              ]
+          }
+        }
+        return
+      }
+        
       let endpoint = "/api/calculation/";
       try {
         const response = await axios.get(endpoint);
@@ -59,7 +89,7 @@ export default {
         try {
           const response = await axios.get(endpoint);
           this.usage_data = JSON.parse(response.data); 
-          console.log(calculation.id);
+          console.log(response.data);
         } catch (error) {
           console.log("error")
           alert(error.response.statusText);
@@ -76,6 +106,9 @@ export default {
         alert(error.response.statusText);
       }
 
+      if(!this.user.authenticated)
+        return
+        
       endpoint = "/api/component/";
       try {
         const response = await axios.get(endpoint);
@@ -83,12 +116,11 @@ export default {
       } catch (error) {
         alert(error.response.statusText);
       }
-      //console.log(this.components_data);
     }
       
   },
   created() {
-    this.getComponents()
+    this.getComponents();
     this.getCalculations();
   }
 

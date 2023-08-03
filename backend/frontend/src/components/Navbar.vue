@@ -35,7 +35,8 @@ const handleSelect = (key, keyPath) => {
 
 <script>
   export default {
-    name: "NavBar"
+    name: "NavBar",
+    props: ["user"]
   }
 </script>
 

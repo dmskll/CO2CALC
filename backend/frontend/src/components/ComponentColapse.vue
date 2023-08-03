@@ -22,7 +22,7 @@
 
 
 
-   <el-button text @click="dialogFormVisible = true; usage_to_edit=add_usage;">
+   <el-button text @click="dialogFormVisible = true; usage_to_edit=new_usage;">
     +
   </el-button>
 
@@ -48,15 +48,16 @@ import { axios } from "@/common/api.service.js"
 
   export default {
     name: "ComponentColapse",
-    props: ["data", "calculation_id"],
+    props: ["user", "data", "calculation_id"],
     data() {
       return {
         local_data: JSON.parse(JSON.stringify(this.data)),
         component_id: this.calculation_id,
         dialogFormVisible: false,
         usage_to_edit: {},
-        add_usage: {
-          Description: "Uso nuevo 2",
+        dialog_usage_index: null,
+        new_usage: {
+          Description: null,
           calculation: 0,
           component: 0,
           hours: 0,
@@ -70,17 +71,6 @@ import { axios } from "@/common/api.service.js"
       ComponentUsage
     },
     methods: {
-      async addUse() {
-        let new_usage = {
-          "Description":"Uso nuevo",
-          "calculation":"0",
-          "component": this.local_data.id,
-          "hours":"0",
-          "id":"-1",
-          "use":"0",
-        }
-        this.local_data.usage.push(new_usage);
-      },
       closeDialog() {
         this.dialogFormVisible = false;
       },
@@ -93,14 +83,23 @@ import { axios } from "@/common/api.service.js"
           "Description": data.Description,
           "component": this.local_data.id
         };
-
+        console.log(data)
         if (data.id){
-          
           //si tiene id es un uso existente entonces hay que editarlo
-          //encontramos el index en la array de usage y modificamos el elemento
-          const index = this.local_data.usage.findIndex((local_data) => local_data.id === data.id);
+          //encontramos el index en la array de usage y modificamos el elemento, 
+          //si no se encuentra el index es -1
+          
+          //console.log("id")
+          //const index = this.local_data.usage.findIndex((local_data) => local_data.id === data.id);
+          const index = this.dialog_usage_index;
           if (index !== -1){
-            
+            if(!this.user.authenticated){
+              //le damos -1 como id para marcar que se ha creado pero que no se añade en la database
+              component_usage["id"] = "-1";
+              this.local_data.usage[index] = component_usage;
+              return
+            }
+
             let endpoint = "/api/usage/" + data.id
             axios.put(endpoint, component_usage)
             .then(response => {
@@ -114,7 +113,8 @@ import { axios } from "@/common/api.service.js"
           }
           
         }
-        else {
+        else { //si no tiene indice significa que es un uso nuevo
+
           //CREAR UN IF NOT AUTHENTITICATED
           // let new_usage = {
           //   "Description": data.Description,
@@ -125,6 +125,14 @@ import { axios } from "@/common/api.service.js"
           //   "use": data.use,
           // }
           // this.local_data.usage.push(new_usage);
+          console.log("no id")
+          if(!this.user.authenticated){
+            //le damos -1 como id para marcar que se ha creado pero que no se añade en la database
+            component_usage["id"] = "-1";
+            this.local_data.usage.push(component_usage);
+            console.log(this.local_data.usage)
+            return
+          }
 
           let endpoint = "/api/calculation/"+ this.calculation_id +"/usage/"
           axios.post(endpoint, component_usage)
@@ -142,7 +150,8 @@ import { axios } from "@/common/api.service.js"
 
         console.log(index);
         this.local_data.usage.splice(index, 1);
-        
+        if(!this.user.authenticated)
+          return
 
           let endpoint = "/api/usage/" + id;
           axios.delete(endpoint,)
@@ -155,11 +164,10 @@ import { axios } from "@/common/api.service.js"
             });
 
       },
-      editUsage(id) {
-        this.usage_to_edit = this.local_data.usage[id];
+      editUsage(index) {
+        this.dialog_usage_index = index;
+        this.usage_to_edit = this.local_data.usage[index];
         this.dialogFormVisible = true;
-        console.log(this.local_data.usage[id]);
-
       }
 
     }
