@@ -1,6 +1,11 @@
 <template>
-
-  {{ local_data.Description }} <br>
+  <el-input
+    :disabled="!dialog"
+    v-model="local_data.Description"
+    type="textarea"
+    autosize
+    placeholder="Please input"
+  />
   <el-form-item label="Horas usadas">
     <el-input-number :disabled="!dialog" v-model="local_data.hours" :precision="2" :step="0.1" :max="1000" :controls="false" />
   </el-form-item>
@@ -16,32 +21,27 @@
       </el-button>
     </span>
   </div>
-    
 </template>
   
-<script setup>
-//import { ref } from 'vue';
-
-
-
-</script>
 
 
 <script>
   export default {
     name: "ComponentUsage",
     props: ["data", "dialog"],
-    emits: ["SaveDialogUsage, CloseDialogUsage"],
-    setup(props, ctx) {
-      ctx.emit('submit')
+    watch: {
+      data() {
+        this.local_data = JSON.parse(JSON.stringify(this.data))
+      },
     },
+    emits: ["save", "close"],
+    // setup(props, ctx) {
+    //    ctx.emit()
+    // },
     data() {
       return {
         local_data: JSON.parse(JSON.stringify(this.data))
       }
-    },
-    methods: {
- 
     }
   }
 </script>

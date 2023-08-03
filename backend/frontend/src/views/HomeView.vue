@@ -1,14 +1,13 @@
 
 <template>
   <main>
-  
     <h2>Home page!</h2>
     <button v-on:click="getComponents">load components</button>
     <div v-for="usage in usage_data" :key="usage.pk">
       <div class="hw-collapse">
         <el-collapse>
           <el-collapse-item :title="usage.name" >
-            <ComponentColapse :data="usage" />
+            <ComponentColapse :data="usage" :calculation_id="3"/>
           </el-collapse-item>
         </el-collapse>
       </div> 
@@ -60,7 +59,7 @@ export default {
         try {
           const response = await axios.get(endpoint);
           this.usage_data = JSON.parse(response.data); 
-          console.log(response.data);
+          console.log(calculation.id);
         } catch (error) {
           console.log("error")
           alert(error.response.statusText);
@@ -91,7 +90,6 @@ export default {
   created() {
     this.getComponents()
     this.getCalculations();
-    
   }
 
 }
