@@ -12,6 +12,20 @@
         </el-collapse>
       </div> 
     </div>
+    <el-button text @click="dialogComponentVisible = true; usage_to_edit=new_usage;">
+      +
+    </el-button>
+
+    <el-dialog v-model="dialogComponentVisible"  title="Add component">
+
+      <span class="dialog-footer">
+      <el-button @click="dialogComponentVisible = false">Cancel</el-button>
+      <el-button type="primary" @click="dialogComponentVisible = false">
+        Confirm
+      </el-button>
+    </span>
+
+  </el-dialog>
   </main>
 </template>
 
@@ -30,7 +44,8 @@ export default {
       },
       calculations_data: [],
       usage_data: [],
-      current_calculation: 0
+      current_calculation: 0,
+      dialogComponentVisible:false
     }
   },
   props: ["user"],

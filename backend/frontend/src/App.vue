@@ -21,8 +21,7 @@ export default {
   data() {
     return {
       user_info: {
-        auth: false,
-        name: null
+        authenticated: false,
       },
       loaded: false 
     }

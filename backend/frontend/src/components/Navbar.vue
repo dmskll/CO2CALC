@@ -7,9 +7,10 @@
       @select="handleSelect"
     >
     <el-menu-item index="1" >Calculadora</el-menu-item>
-    <el-menu-item index="2" href="/info">Información</el-menu-item>
+    <el-menu-item index="3" >Componentes</el-menu-item>
+    <el-menu-item index="2" >Información</el-menu-item>
     <div class="flex-grow" />
-    <el-menu-item index="3" href="/info">Login</el-menu-item>
+    <el-menu-item index="4" >Login</el-menu-item>
     </el-menu>
 </template>
   
@@ -25,8 +26,11 @@ const handleSelect = (key, keyPath) => {
   }
   else if (key == 2) {
     router.push("/info");
-  } 
+  }
   else if (key == 3) {
+    router.push("/components");
+  } 
+  else if (key == 4) {
     window.open("http://127.0.0.1:8000/api-auth/login/");
   } 
 };
