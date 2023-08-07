@@ -4,10 +4,10 @@
       <h3>Info</h3>
         <el-button  @click="editComponent()">Edit</el-button>
         <el-button  @click="removeComponent()">Remove</el-button> <br>
-        <ComponentInfo :data="local_data" :dialog="false"/>
+        <ComponentInfo :data="component" :dialog="false"/>
 
       <el-dialog v-model="dialogFormVisible"  title="Shipping address">
-        <ComponentInfo v-if="dialogFormVisible" :data="local_data" :dialog="false" @close="closeDialog" @save="saveUsageData"/>
+        <ComponentInfo v-if="dialogFormVisible" :data="component" :dialog="false" @close="closeDialog" @save="saveUsageData"/>
       </el-dialog>
     </el-col>
     <el-col :span="10" style="padding-left: 20px">
@@ -18,26 +18,23 @@
         <ComponentUsage :data="use" :dialog="false"/>
       </div>
 
-
-
-
-
    <el-button text @click="dialogFormVisible = true; usage_to_edit=new_usage;">
     +
   </el-button>
 
   <el-dialog v-model="dialogFormVisible"  title="Shipping address">
-    <ComponentUsage v-if="dialogFormVisible" :data="usage_to_edit" :dialog="true" @close="closeDialog" @save="saveUsageData"/>
+    <ComponentUsage 
+      v-if="dialogFormVisible" 
+      :data="usage_to_edit" 
+      :dialog="true" 
+      @close="closeDialog" 
+      @save="saveUsageData"
+    />
   </el-dialog>
     </el-col>
   </el-row>
 </template>
   
-<script setup>
-
-
-</script>
-
 
 <script>
 import ComponentInfo from "@/components/ComponentInfo.vue"
@@ -46,13 +43,23 @@ import { axios } from "@/common/api.service.js"
 
   export default {
     name: "ComponentColapse",
-    props: ["user", "data", "calculation_id"],
+    props: ["user", "data", "calculation_id", "component"],
+    emits: ["update"],
+    // setup (props, { emit }) {
+    //     const update = (data) => {
+    //         emit("update", data)
+    //     }
+    //     return {
+    //         update
+    //     }
+    // },
     data() {
       return {
         local_data: JSON.parse(JSON.stringify(this.data)),
+        
         component_id: this.calculation_id,
-        dialogFormVisible: false,
         usage_to_edit: {},
+        dialogFormVisible: false,
         dialog_usage_index: null,
         new_usage: {
           Description: null,
@@ -61,7 +68,7 @@ import { axios } from "@/common/api.service.js"
           hours: 0,
           id: null,
           use: 0,
-        },
+        }
       }
     },
     components: {
@@ -81,7 +88,6 @@ import { axios } from "@/common/api.service.js"
           "Description": data.Description,
           "component": this.local_data.id
         };
-        console.log(data)
         if (data.id){
           //si tiene id es un uso existente entonces hay que editarlo
           //encontramos el index en la array de usage y modificamos el elemento, 
@@ -95,6 +101,7 @@ import { axios } from "@/common/api.service.js"
               //le damos -1 como id para marcar que se ha creado pero que no se añade en la database
               component_usage["id"] = "-1";
               this.local_data.usage[index] = component_usage;
+              this.$emit("update", this.local_data);
               return
             }
 
@@ -103,6 +110,7 @@ import { axios } from "@/common/api.service.js"
             .then(response => {
               console.log(response.data);
               this.local_data.usage[index] = data;
+              this.$emit("update", this.local_data);
             })
             .catch(error => {
               this.errorMessage = error.message;
@@ -128,6 +136,7 @@ import { axios } from "@/common/api.service.js"
             //le damos -1 como id para marcar que se ha creado pero que no se añade en la database
             component_usage["id"] = "-1";
             this.local_data.usage.push(component_usage);
+            this.$emit("update", this.local_data);
             console.log(this.local_data.usage)
             return
           }
@@ -137,6 +146,7 @@ import { axios } from "@/common/api.service.js"
             .then(response => {
               console.log(response.data);
               this.local_data.usage.push(response.data);
+              this.$emit("update", this.local_data);
             })
             .catch(error => {
               this.errorMessage = error.message;
@@ -145,9 +155,8 @@ import { axios } from "@/common/api.service.js"
         }
       },
       removeUsage(index, id) {
-
-        console.log(index);
         this.local_data.usage.splice(index, 1);
+        this.$emit("update", this.local_data);
         if(!this.user.authenticated)
           return
 
@@ -160,7 +169,6 @@ import { axios } from "@/common/api.service.js"
               this.errorMessage = error.message;
               console.error("There was an error!", error);
             });
-
       },
       editUsage(index) {
         this.dialog_usage_index = index;

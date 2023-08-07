@@ -28,7 +28,7 @@ class ComponentListCreateAPIView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):        
         owner = self.request.user
-        system = self.request.usejsonr.is_superuser
+        system = self.request.user.is_superuser
         serializer.save(owner = owner, system_component = system)
 
     def get_queryset(self):
