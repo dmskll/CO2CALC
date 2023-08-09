@@ -2,7 +2,7 @@
     <h1>Lista de componentes</h1>
     <div style="text-align: left;">
       <h3>Componentes de pre-hechos</h3>
-        <div v-for="component in local_components.system" :key="component.pk" style=" display: flex; align-items: center;justify-content: center;">
+        <div v-for="(component, index) in local_components.system" :key="component.pk" style=" display: flex; align-items: center;justify-content: center;">
           <el-card class="box-card">
             <template #header>
               <div class="card-header">
@@ -13,8 +13,8 @@
                   </el-button>
                   <template #dropdown>
                     <el-dropdown-menu>
-                      <el-dropdown-item @click="editComponent">Editar</el-dropdown-item>
-                      <el-dropdown-item @click="duplicateComponent">Duplicar</el-dropdown-item>
+                      <el-dropdown-item @click="editComponent" disabled>Editar</el-dropdown-item>
+                      <el-dropdown-item @click="duplicateComponent(index)">Duplicar</el-dropdown-item>
                       <el-dropdown-item @click="deleteComponent" divided disabled>Eliminar</el-dropdown-item>
                     </el-dropdown-menu>
                   </template>
@@ -38,7 +38,7 @@
                 <template #dropdown>
                   <el-dropdown-menu>
                     <el-dropdown-item @click="editComponent(index)">Editar</el-dropdown-item>
-                    <el-dropdown-item @click="duplicateComponent">Duplicar</el-dropdown-item>
+                    <el-dropdown-item @click="duplicateComponent(index)">Duplicar</el-dropdown-item>
                     <el-dropdown-item @click="deleteComponent(index)" divided>Eliminar</el-dropdown-item>
                   </el-dropdown-menu>
                 </template>
@@ -91,7 +91,7 @@ export default {
       console.log("delete!")
       const id = this.local_components.user[index].id
       this.local_components.user.splice(index, 1);
-      this.$emit("updateComponents", this.local_data);
+      this.$emit("updateComponents", this.local_components.user);
         
       if(!this.user.authenticated)
         return
@@ -106,8 +106,14 @@ export default {
               console.error("There was an error!", error);
             });
     },
-    duplicateComponent(){
-      console.log("duplicate!")
+    duplicateComponent(index){
+      console.log("duplicate!");
+      this.dialog_component = JSON.parse(JSON.stringify(this.local_components.user[index]));
+       //borramos el elemento id para que cuando se cree uno nuevo al guardar
+      delete this.dialog_component["id"];
+      this.dialog_component.name = this.dialog_component.name + " (copy)" 
+      this.dialogVisible = true;
+      
     },
     editComponent(index){
       this.dialog_component = this.local_components.user[index];

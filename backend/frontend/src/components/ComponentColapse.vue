@@ -2,13 +2,7 @@
     <el-row>
     <el-col :span="14" style="padding-right: 20px">
       <h3>Info</h3>
-        <el-button  @click="editComponent()">Edit</el-button>
-        <el-button  @click="removeComponent()">Remove</el-button> <br>
         <ComponentInfo :data="component" :dialog="false"/>
-
-      <el-dialog v-model="dialogFormVisible"  title="Shipping address">
-        <ComponentInfo v-if="dialogFormVisible" :data="component" :dialog="false" @close="closeDialog" @save="saveUsageData"/>
-      </el-dialog>
     </el-col>
     <el-col :span="10" style="padding-left: 20px">
       <h3>Uso</h3>

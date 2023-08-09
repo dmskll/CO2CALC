@@ -7,34 +7,40 @@
       <div class="content" v-if="loaded">
 
 
-        <router-view
+        <!-- <router-view
           :user="user_info" 
           :calculation_data="calculation_data"
           :calculations_data="calculation"
           :components="components"
+          @addComponent="addComponentUse"
           @updateCalculation="updateCalculationData"
           @updateComponents="updateComponentsData"
-        />
-        <!-- <router-view
-          v-if="this.$route.name === Components"
+        /> -->
+        <router-view
+          v-if="this.$route.name === 'Components'"
           :user="user_info" 
           :components="components"
-          @update="updateComponentsData"
+          @updateComponents="updateComponentsData"
         />
 
         <router-view
-          v-if="this.$route.name === Info"
+          v-if="this.$route.name === 'Info'"
           :user="user_info" 
         />
 
         <router-view
-          v-if="this.$route.name === Home"
+          v-if="this.$route.name === 'Home'"
           :user="user_info" 
           :calculation_data="calculation_data"
-          :calculations_data="calculation"
+          :calculations_data="calculations"
           :components="components"
-          @update="updateCalculationData"
-        /> -->
+          :current_calculation="current_calculation"
+          @updateCalculation="updateCalculationData"
+          @addComponent="addComponentUse"
+          @changeCalculation="changeCalculation"
+          @removeUsedComponent="removeUsedComponent"
+
+        />
       </div>
     </el-col>
   </el-row>
@@ -123,20 +129,20 @@ export default {
       } catch (error) {
         alert(error.response.statusText);
       }
+      this.current_calculation = this.calculations[0].id
       this.getCalculationComponents();
     },
-    getCalculationComponents() {
-      this.calculations.forEach( async (calculation) => {
-        let endpoint = "/api/calculation/" + calculation.id + "/data/";
-        try {
-          const response = await axios.get(endpoint);
-          this.calculation_data = JSON.parse(response.data); 
-          console.log(response.data);
-        } catch (error) {
-          console.log("error")
-          alert(error.response.statusText);
-        }
-      });
+    async getCalculationComponents() {
+
+      let endpoint = "/api/calculation/" + this.current_calculation + "/data/";
+      try {
+        const response = await axios.get(endpoint);
+        this.calculation_data = JSON.parse(response.data); 
+        console.log(response.data);
+      } catch (error) {
+        console.log("error")
+        alert(error.response.statusText);
+      }
     },
     async getComponents() {
 
@@ -159,13 +165,57 @@ export default {
         alert(error.response.statusText);
       }
     },
+    getIndexByID(data){
+      return this.calculation_data.findIndex(obj => obj.id === data.id);
+    },
     updateCalculationData(data){
-      this.calculation_data[data.id] = data
+      const index = this.getIndexByID(data);
+      this.calculation_data[index] = data;
     },
     updateComponentsData(data){
       this.components.user = data;
       console.log("editado!")
       console.log(this.components.user)
+    },
+    addComponentUse(system, index){
+      console.log("recivido");
+      const component = system ? this.components.system[index] : this.components.user[index];
+      component["usage"] = [];
+      //const calc_index = this.getIndexByID(component);
+      this.calculation_data.push(component);
+    },
+    changeCalculation(id){
+      this.current_calculation = id;
+      this.getCalculationComponents();
+    },
+    async removeUsedComponent(index){
+
+      this.calculation_data[index].usage.forEach(use => {
+        let endpoint = "/api/usage/" + use.id;
+          axios.delete(endpoint)
+            .then(response => {
+              console.log(response);
+            })
+            .catch(error => {
+              this.errorMessage = error.message;
+              console.error("There was an error!", error);
+            });
+      });
+      this.calculation_data.splice(index, 1)
+      // this.local_data.usage.splice(index, 1);
+      //   this.$emit("update", this.local_data);
+      //   if(!this.user.authenticated)
+      //     return
+
+      //     let endpoint = "/api/usage/" + id;
+      //     axios.delete(endpoint,)
+      //       .then(response => {
+      //         console.log(response);
+      //       })
+      //       .catch(error => {
+      //         this.errorMessage = error.message;
+      //         console.error("There was an error!", error);
+      //       });
     }
   },
   created() {

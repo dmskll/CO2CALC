@@ -120,7 +120,7 @@ class CalculationData(APIView):
         if calc.owner == user:
             usages = get_list_or_404(ComponentUsage, calculation=calc_pk2)
             print(usages[0].use)
-            component_uses = {}
+            component_uses = []
             for use in usages:
                 json_use = {
                     "id": use.id,
@@ -130,27 +130,21 @@ class CalculationData(APIView):
                     "Description": use.Description,
                     "component": use.component.id
                 }
-                if use.component.id in component_uses:
-                    component_uses[use.component.id]["usage"].append(json_use)
-                else:
-                    component_uses[use.component.id] = {
+                add_component = True;
+                for index, component_use in enumerate(component_uses):
+                    if use.component.id == component_use["id"]:
+                        component_uses[index]["usage"].append(json_use)
+                        add_component = False;
+                        break
+
+                if add_component:
+                    component_uses.append({
                         "id": use.component.id,
                         "owner": use.component.owner,
                         "system_component": use.component.system_component,
-                        "name": use.component.name,
-                        "description": use.component.description,
-                        "idle_power": use.component.idle_power,
-                        "bad_case_idle_power": use.component.bad_case_idle_power,
-                        "good_case_idle_power": use.component.good_case_idle_power,
-                        "max_power": use.component.max_power,
-                        "bad_case_max_power": use.component.bad_case_max_power,
-                        "good_case_max_power": use.component.good_case_max_power,
-                        "cfp": use.component.cfp,
-                        "cfp_use_phase": use.component.cfp_use_phase,
-                        "cfp_deviation_standard": use.component.cfp_deviation_standard,
-                        "usage": []
-                    }
-                    component_uses[use.component.id]["usage"] = [json_use]
+                        "usage": [json_use]
+                    })
+                    
 
             json_data = json.dumps(component_uses, indent=4, default=str, sort_keys=True, ensure_ascii=False)
             print(json_data)
