@@ -19,9 +19,9 @@
     <h1>Calculadora: {{ calculation_data.name }}</h1>
     <div v-for="(used_component, index) in calculation_data" :key="used_component.pk">
       <div class="hw-collapse">
-        <el-collapse>
-          <el-collapse-item>
-            <template #title>
+        <el-card>
+
+
               <el-dropdown>
                   <el-button class="button" text>
                    ⚙️
@@ -34,17 +34,19 @@
                     </el-dropdown-menu>
                   </template>
               </el-dropdown>
-              {{ this.getComponentName(used_component.system_component, used_component.id) }}
-            </template>
-            <ComponentColapse 
-              :user="user" 
-              :data="used_component" 
-              :calculation_id="this.current_calculation"
-              :component="getComponent(used_component.system_component, used_component.id)" 
-              @update="updateData"
-            />
-          </el-collapse-item>
-        </el-collapse>
+              <br>
+
+
+
+
+              <ComponentData
+                :dialog="false"
+                :data="getComponent(used_component.system_component, used_component.id)" 
+              />
+
+
+
+        </el-card>
       </div> 
     </div>
     <el-button text @click="dialogComponentVisible = true; usage_to_edit=new_usage;">
@@ -79,7 +81,9 @@
 
 <script>
 
-import ComponentColapse from "@/components/ComponentColapse.vue"
+//import ComponentColapse from "@/components/ComponentColapse.vue"
+import ComponentData from "@/components/ComponentData.vue"
+
 
 export default {
   name: "HomeView",
@@ -91,7 +95,7 @@ export default {
   props: ["user", "calculation_data", "calculations_data", "components", "current_calculation" ],
   emits: ["updateCalculation", "addComponent", "changeCalculation", "removeUsedComponent"],
   components: {
-    ComponentColapse
+    ComponentData
   },
   methods: {
     updateData(data){

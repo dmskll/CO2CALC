@@ -27,21 +27,15 @@ class Component(models.Model):
     system_component        = models.BooleanField(default=False)
     name                    = models.CharField(max_length=30)
     description             = models.CharField(max_length=200)
-    idle_power              = models.DecimalField(max_digits=5, decimal_places=2,
+    worse_case               = models.DecimalField(max_digits=5, decimal_places=2,
                                                   validators=[MinValueValidator(0)])
-    bad_case_idle_power     = models.DecimalField(max_digits=5, decimal_places=2,
+    best_case      = models.DecimalField(max_digits=5, decimal_places=2,
                                                   validators=[MinValueValidator(0)])
-    good_case_idle_power    = models.DecimalField(max_digits=5, decimal_places=2,
-                                                  validators=[MinValueValidator(0)])
-    max_power               = models.DecimalField(max_digits=5, decimal_places=2,
-                                                  validators=[MinValueValidator(0)])
-    bad_case_max_power      = models.DecimalField(max_digits=5, decimal_places=2,
-                                                  validators=[MinValueValidator(0)])
-    good_case_max_power     = models.DecimalField(max_digits=5, decimal_places=2,
+    middle_case     = models.DecimalField(max_digits=5, decimal_places=2,
                                                   validators=[MinValueValidator(0)])
     cfp                     = models.DecimalField(max_digits=5, decimal_places=2,
                                                   validators=[MinValueValidator(0)])
-    cfp_use_phase           = models.DecimalField(max_digits=5, decimal_places=2,
+    cfp_build_phase           = models.DecimalField(max_digits=5, decimal_places=2,
                                                   validators=[MinValueValidator(0)])
     cfp_deviation_standard  = models.DecimalField(max_digits=5, decimal_places=2,
                                                   validators=[MinValueValidator(0)])

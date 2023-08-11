@@ -2,7 +2,7 @@
   <div id="nav">
     <NavBar :user="user_info" />
   </div>
-  <el-row :gutter="20">
+  <el-row>
     <el-col :span="18" :offset="3">
       <div class="content" v-if="loaded">
 
@@ -238,7 +238,8 @@ export default {
   border-style: solid;
   margin-top: 25px;
   border-radius: 30px;
-  padding: 50px;
+  padding: 100px;
+  width: 21cm;
 }
 
 .demo-radius .radius {
