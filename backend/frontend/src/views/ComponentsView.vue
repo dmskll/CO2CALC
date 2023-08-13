@@ -54,7 +54,7 @@
       </el-button>
 
       <el-dialog v-model="dialogVisible"  title="Create Component">
-        <ComponentInfo 
+        <ComponentData 
           v-if="dialogVisible" 
           :data="this.dialog_component" 
           :dialog="true"
@@ -68,18 +68,25 @@
 
 <script>
   import { axios } from "@/common/api.service.js"
-  import ComponentInfo from "@/components/ComponentInfo.vue"
+  import ComponentData from "@/components/ComponentData.vue"
+  import { useComponentsData } from "@/stores/ComponentsData"
+
+
 export default {
 
   name: "ComponentsView",
-  props: ["user", "components", "calculation_data", "calculations_data"],
-  emits: ["updateComponents"],
   components: {
-    ComponentInfo
+    ComponentData
+  },
+  setup(){
+    const store = useComponentsData();
+    return {
+      store: store,
+    }
   },
   data() {
     return {
-      local_components: JSON.parse(JSON.stringify(this.components)),
+      local_components: this.store.components,
       dialogVisible: false,
       new_component: [],
       dialog_component: [],
@@ -91,9 +98,8 @@ export default {
       console.log("delete!")
       const id = this.local_components.user[index].id
       this.local_components.user.splice(index, 1);
-      this.$emit("updateComponents", this.local_components.user);
         
-      if(!this.user.authenticated)
+      if(!this.store.user_info.authenticated)
         return
 
       let endpoint = "/api/component/" + id +"/";
@@ -144,9 +150,8 @@ export default {
           //console.log("id")
           //const index = this.local_data.usage.findIndex((local_data) => local_data.id === data.id);
           const index = this.dialog_component_index;
-          if(!this.user.authenticated){
+          if(!this.store.user_info.authenticated){
             this.local_components.user[index] = component;
-            this.$emit("updateComponents", this.local_components.user);
             return
           }
 
@@ -155,7 +160,6 @@ export default {
           .then(response => {
             console.log(response.data);
             this.local_components.user[index] = component;
-            this.$emit("updateComponents", this.local_components.user);
           })
           .catch(error => {
             this.errorMessage = error.message;
@@ -167,11 +171,10 @@ export default {
         else { //si no tiene indice significa que es un componente nuevo
 
           console.log("no id")
-          if(!this.user.authenticated){
+          if(!this.store.user_info.authenticated){
             //le damos -1 como id para marcar que se ha creado pero que no se añade en la database
             component["id"] = "-1";
             this.local_components.user.push(component);
-            this.$emit("updateComponents", this.local_components.user);
             console.log(this.local_components.usage)
             return
           }
@@ -182,7 +185,6 @@ export default {
             .then(response => {
               console.log(response.data);
               this.local_components.user.push(response.data);
-              this.$emit("updateComponents", this.local_components.user);
             })
             .catch(error => {
               this.errorMessage = error.message;

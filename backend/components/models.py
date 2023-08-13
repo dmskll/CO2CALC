@@ -63,12 +63,14 @@ class ComponentUsage(models.Model):
                              on_delete=models.CASCADE, 
                              related_name="usage")  
     hours                   = models.IntegerField(validators=[MinValueValidator(0)])
-    use                     = models.IntegerField(validators=[MinValueValidator(0),
-                                                              MaxValueValidator(100)])
-    Description             = models.TextField(null=True, blank=True)
+    # use                     = models.IntegerField(validators=[MinValueValidator(0),
+    #                                                           MaxValueValidator(100)])
+    # Description             = models.TextField(null=True, blank=True)
 
+    class Meta:
+        unique_together = ('component', 'calculation')
     def __str__(self):
-        return f" Component {self.component.name} used by {self.owner.username} "
+        return f" Component {self.component.name} used by {self.calculation.owner.username} "
 
 
         

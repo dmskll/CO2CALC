@@ -68,12 +68,27 @@ class ComponentUsageListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = ComponentUsageSerializer
     #permission_classes = [IsOwner]
 
-    def perform_create(self, serializer):
-        calc_pk = self.kwargs.get("calc_pk")
+    # para poder hacer el return response error, tenemos que utilizar create()
+    def create(self, request, *args, **kwargs):
+        calc_pk = kwargs.get("calc_pk")
         calc = get_object_or_404(Calculation, pk=calc_pk)
         
+        component = request.data.get("component")    
+
+        # Nos aseguramos de que no haya un  uso del mismo componente en el calculo
+        if ComponentUsage.objects.filter(component=component, calculation=calc).exists():
+            return Response({"error": "Ya existe un uso para este componente en este cálculo."},
+                            status=status.HTTP_400_BAD_REQUEST)
         
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer, calc)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)    
+    
+    def perform_create(self, serializer, calc):
         serializer.save(calculation=calc)
+
 
     def get_queryset(self):
         if self.request.user.is_authenticated:

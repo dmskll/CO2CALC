@@ -7,7 +7,7 @@
     </span>
     <template #dropdown>
       <el-dropdown-menu >
-        <div v-for="calculation in this.calculations_data" :key="calculation.pk" >
+        <div v-for="calculation in this.store.calculations" :key="calculation.pk" >
           <el-dropdown-item @click="changeCalculation(calculation.id)"> {{ calculation.name }}</el-dropdown-item>
         </div>
       </el-dropdown-menu>
@@ -16,8 +16,8 @@
 
 
 
-    <h1>Calculadora: {{ calculation_data.name }}</h1>
-    <div v-for="(used_component, index) in calculation_data" :key="used_component.pk">
+    <h1>Calculadora: {{ this.store.calculations.name }}</h1>
+    <div v-for="(used_component, index) in this.store.components_use" :key="used_component.pk">
       <div class="hw-collapse">
         <el-card>
 
@@ -41,7 +41,9 @@
 
               <ComponentData
                 :dialog="false"
-                :data="getComponent(used_component.system_component, used_component.id)" 
+                :data="getComponent(used_component.component)"
+                :use="used_component"
+                @saveUse="updateData"
               />
 
 
@@ -55,13 +57,13 @@
 
     <el-dialog v-model="dialogComponentVisible"  title="Add component" width="40%">
       <el-scrollbar height="400px" style="width: auto;">
-        <div v-for="(component, index) in components.system" :key="component.pk">
+        <div v-for="(component, index) in this.store.components.system" :key="component.pk">
           <el-card @click="addComponent(component.system_component, index)" class="box-card" el-card shadow="hover">
             <div class="text item"><b>{{ component.name }}</b></div>
             <div class="text item">{{ component.description }}</div>
           </el-card>
         </div>
-        <div v-for="(component, index) in components.user" :key="component.pk" style="width: auto;">
+        <div v-for="(component, index) in this.store.components.user" :key="component.pk" style="width: auto;">
           <el-card @click="addComponent(component.system_component, index)" class="box-card" el-card shadow="hover">
             <div class="text item"><b>{{ component.name }}</b></div>
             <div class="text item">{{ component.description }}</div>
@@ -83,53 +85,106 @@
 
 //import ComponentColapse from "@/components/ComponentColapse.vue"
 import ComponentData from "@/components/ComponentData.vue"
-
+import { useComponentsData } from "@/stores/ComponentsData"
+import { axios } from "@/common/api.service.js"
 
 export default {
   name: "HomeView",
+  setup(){
+    const store = useComponentsData();
+    return {
+      store: store,
+    }
+
+  },
   data() {
     return {
       dialogComponentVisible: false,
     }
   },
   props: ["user", "calculation_data", "calculations_data", "components", "current_calculation" ],
-  emits: ["updateCalculation", "addComponent", "changeCalculation", "removeUsedComponent"],
+  emits: ["updateCalculation", "changeCalculation", "removeUsedComponent"],
   components: {
     ComponentData
   },
   methods: {
     updateData(data){
-      this.$emit('updateCalculation', data)
-    },
-    getComponent(system, id){
-      if(system){
-        const component = this.components.system.filter((item) => item.id === id);
-        return component[0];
+      console.log("pierde contexto")
+      console.log(data)
+      const body = {
+        "component": data.component,
+        "hours": data.hours,
       }
-      const component = this.components.user.filter((item) => item.id === id)
+      const index = this.store.components_use.findIndex((use) => use.id === data.id);
+      this.store.components_use[index] = data;
+      let endpoint = "/api/usage/" + data.id
+            axios.put(endpoint, body)
+            .then(response => {
+              console.log(response.data);
+            })
+            .catch(error => {
+              this.errorMessage = error.message;
+              console.error("There was an error!", error);
+            });
+    },
+    getComponent(id){
+      let component = this.store.components.system.filter((item) => item.id === id);
+      
+      if(typeof component[0] === 'undefined'){
+        component = this.store.components.user.filter((item) => item.id === id)
+        console.log("dentro")
+      }
+      console.log(component[0])
       return component[0];
     },
-    getComponentName(system, id){
-      if(system){
-        console.log("sistema");
-        const component = this.components.system.filter((item) => item.id === id);
-        return component[0].name;
-      }
-      console.log("no sistema");
-      const component = this.components.user.filter((item) => item.id === id)
+    getComponentName(id){
+      let component = this.store.components.system.filter((item) => item.id === id);
+      
+      if(typeof component === 'undefined')
+        component = this.store.components.user.filter((item) => item.id === id)
+
       return component[0].name;
     },
-    addComponent(index, system){
-      console.log("añadido!");
-      this.$emit('addComponent', index, system);
+
+
+    
+    addComponent(system, index){
+      console.log("añadido!" + index);
+      const component = system ? this.store.components.system[index] : this.store.components.user[index];
+
+      const body = {
+        "component": component.id,
+        "hours": 0,
+      }
+      let endpoint = "/api/calculation/"+ this.store.current_calculation +"/usage/"
+      axios.post(endpoint, body)
+      .then(response => {
+        console.log(response.data);
+        this.store.components_use.push(response.data);
+      })
+      .catch(error => {
+        this.errorMessage = error.message;
+        console.error("There was an error!", error);
+      });
+
       this.dialogComponentVisible = false;
     },
     changeCalculation(id){
       this.$emit('changeCalculation', id)
     },
     removeUsedComponent(index){
-      this.$emit('removeUsedComponent', index);
-    }
+      let endpoint = "/api/usage/" + this.store.components_use[index].id;
+        axios.delete(endpoint)
+          .then(response => {
+            console.log(response);
+          })
+          .catch(error => {
+            this.errorMessage = error.message;
+            console.error("There was an error!", error);
+          });
+      this.store.components_use.splice(index, 1)
+    },
+    
   },
 
 }

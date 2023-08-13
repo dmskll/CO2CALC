@@ -19,7 +19,7 @@
     </div>
     <div style="flex: 1">
       <el-form-item label="horas usadas">
-            <el-input-number :precision="2" :step="0.1" :max="1000" :controls="false" />
+            <el-input-number v-model="local_use.hours" @focusin="old_hours=local_use.hours" @focusout="saveUse" :precision="2" :step="0.1" :max="1000" :controls="false" />
       </el-form-item>
     </div>
   </div>
@@ -91,14 +91,20 @@
   export default {
     name: "ComponentData",
     props: ["data", "dialog", "use"],
-    emits: ["save", "close"],
+    emits: ["saveUse", "save", "close"],
     data() {
       return {
-        local_data: JSON.parse(JSON.stringify(this.data))
+        local_data: JSON.parse(JSON.stringify(this.data)),
+        local_use: JSON.parse(JSON.stringify(this.use)),
+        old_hours: 0
       }
     },
     methods: {
-
+      saveUse(){
+        // si se ha modificado el campo lo enviamos
+        if(this.old_hours != this.local_use.hours)
+          this.$emit('saveUse', this.local_use)
+      }
     }
   }
 </script>

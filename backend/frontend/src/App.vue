@@ -8,7 +8,6 @@
 
 
         <!-- <router-view
-          :user="user_info" 
           :calculation_data="calculation_data"
           :calculations_data="calculation"
           :components="components"
@@ -18,27 +17,17 @@
         /> -->
         <router-view
           v-if="this.$route.name === 'Components'"
-          :user="user_info" 
-          :components="components"
           @updateComponents="updateComponentsData"
         />
 
         <router-view
           v-if="this.$route.name === 'Info'"
-          :user="user_info" 
         />
 
         <router-view
           v-if="this.$route.name === 'Home'"
-          :user="user_info" 
-          :calculation_data="calculation_data"
-          :calculations_data="calculations"
-          :components="components"
-          :current_calculation="current_calculation"
           @updateCalculation="updateCalculationData"
-          @addComponent="addComponentUse"
           @changeCalculation="changeCalculation"
-          @removeUsedComponent="removeUsedComponent"
 
         />
       </div>
@@ -47,25 +36,31 @@
   
 </template>
 
+
+<script setup>
+
+</script>
+
 <script>
 import NavBar from "@/components/Navbar.vue"
 import { axios } from "@/common/api.service.js"
+import { useComponentsData } from "@/stores/ComponentsData"
+
+
 
 export default {
   name: 'App',
+  setup(){
+    const store = useComponentsData();
+    return {
+      store: store,
+    }
+
+  },
   data() {
     return {
-      user_info: {
-        authenticated: false,
-      },
       loaded: false,
-      calculations: [],
-      current_calculation: [],
       calculation_data: [],
-      components: {
-        system: [],
-        user: [],
-      },
     }
   },
   components: {
@@ -76,7 +71,7 @@ export default {
       let endpoint = "/api/user/";
       try {
         const response = await axios.get(endpoint);
-        this.user_info = response.data;
+        this.store.user_info = response.data;
       } catch (error) {
         alert(error.response.statusText);
       }
@@ -88,9 +83,9 @@ export default {
       this.loaded = true;
     },
     async getCalculations() {
-      if(!this.user_info.authenticated){
+      if(!this.store.user_info.authenticated){
         console.log("no calculos")
-        this.calculation_data = {
+        this.store.components_use = {
           "5": {
               "bad_case_idle_power": "3.00",
               "bad_case_max_power": "3.00",
@@ -124,20 +119,20 @@ export default {
       let endpoint = "/api/calculation/";
       try {
         const response = await axios.get(endpoint);
-        this.calculations = response.data;
-        console.log(this.calculations);
+        this.store.calculations = response.data;
+        console.log(this.store.calculations);
       } catch (error) {
         alert(error.response.statusText);
       }
-      this.current_calculation = this.calculations[0].id
+      this.store.current_calculation = this.store.calculations[0].id
       this.getCalculationComponents();
     },
     async getCalculationComponents() {
 
-      let endpoint = "/api/calculation/" + this.current_calculation + "/data/";
+      let endpoint = "/api/calculation/" + this.store.current_calculation + "/usage/";
       try {
         const response = await axios.get(endpoint);
-        this.calculation_data = JSON.parse(response.data); 
+        this.store.components_use = response.data; 
         console.log(response.data);
       } catch (error) {
         console.log("error")
@@ -149,18 +144,18 @@ export default {
       let endpoint = "/api/component/system/";
       try {
         const response = await axios.get(endpoint);
-        this.components.system = response.data;
+        this.store.components.system = response.data;
       } catch (error) {
         alert(error.response.statusText);
       }
 
-      if(!this.user_info.authenticated)
+      if(!this.store.user_info.authenticated)
         return
         
       endpoint = "/api/component/";
       try {
         const response = await axios.get(endpoint);
-        this.components.user = response.data;
+        this.store.components.user = response.data;
       } catch (error) {
         alert(error.response.statusText);
       }
@@ -177,49 +172,14 @@ export default {
       console.log("editado!")
       console.log(this.components.user)
     },
-    addComponentUse(system, index){
-      console.log("recivido");
-      const component = system ? this.components.system[index] : this.components.user[index];
-      component["usage"] = [];
-      //const calc_index = this.getIndexByID(component);
-      this.calculation_data.push(component);
-    },
     changeCalculation(id){
       this.current_calculation = id;
       this.getCalculationComponents();
     },
-    async removeUsedComponent(index){
-
-      this.calculation_data[index].usage.forEach(use => {
-        let endpoint = "/api/usage/" + use.id;
-          axios.delete(endpoint)
-            .then(response => {
-              console.log(response);
-            })
-            .catch(error => {
-              this.errorMessage = error.message;
-              console.error("There was an error!", error);
-            });
-      });
-      this.calculation_data.splice(index, 1)
-      // this.local_data.usage.splice(index, 1);
-      //   this.$emit("update", this.local_data);
-      //   if(!this.user.authenticated)
-      //     return
-
-      //     let endpoint = "/api/usage/" + id;
-      //     axios.delete(endpoint,)
-      //       .then(response => {
-      //         console.log(response);
-      //       })
-      //       .catch(error => {
-      //         this.errorMessage = error.message;
-      //         console.error("There was an error!", error);
-      //       });
-    }
   },
   created() {
     this.getUser();
+    console.log(this.store.components)
 
   }
 }
