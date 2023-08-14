@@ -25,6 +25,10 @@
         />
 
         <router-view
+          v-if="this.$route.name === 'Report'"
+        />
+
+        <router-view
           v-if="this.$route.name === 'Home'"
           @updateCalculation="updateCalculationData"
           @changeCalculation="changeCalculation"

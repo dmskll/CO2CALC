@@ -75,10 +75,14 @@
       <el-button type="primary" @click="dialogComponentVisible = false">
         Confirm
       </el-button>
-    </span>
 
+    </span>
+    
   </el-dialog>
-  </main>
+</main>
+<el-button type="primary" @click="generateReport">
+  Generate Report
+</el-button>
 </template>
 
 <script>
@@ -87,6 +91,8 @@
 import ComponentData from "@/components/ComponentData.vue"
 import { useComponentsData } from "@/stores/ComponentsData"
 import { axios } from "@/common/api.service.js"
+import router from '../router';
+
 
 export default {
   name: "HomeView",
@@ -145,9 +151,9 @@ export default {
 
       return component[0].name;
     },
-
-
-    
+    generateReport(){
+      router.push('/report')
+    },
     addComponent(system, index){
       console.log("añadido!" + index);
       const component = system ? this.store.components.system[index] : this.store.components.user[index];
