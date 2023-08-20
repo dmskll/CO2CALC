@@ -1,42 +1,45 @@
 <template>
-  <div id="nav">
+  <div id="nav" class="header">
     <NavBar :user="user_info" />
   </div>
-  <el-row>
-    <el-col :span="18" :offset="3">
-      <div class="content" v-if="loaded">
-
-
-        <!-- <router-view
-          :calculation_data="calculation_data"
-          :calculations_data="calculation"
-          :components="components"
-          @addComponent="addComponentUse"
-          @updateCalculation="updateCalculationData"
-          @updateComponents="updateComponentsData"
-        /> -->
-        <router-view
-          v-if="this.$route.name === 'Components'"
-          @updateComponents="updateComponentsData"
-        />
-
-        <router-view
-          v-if="this.$route.name === 'Info'"
-        />
-
-        <router-view
-          v-if="this.$route.name === 'Report'"
-        />
-
-        <router-view
-          v-if="this.$route.name === 'Home'"
-          @updateCalculation="updateCalculationData"
-          @changeCalculation="changeCalculation"
-
-        />
+  <div class="box">
+    <div class="view-body">
+      <div :span="18" :offset="3">
+        <div class="content" v-if="loaded==2">
+  
+  
+          <!-- <router-view
+            :calculation_data="calculation_data"
+            :calculations_data="calculation"
+            :components="components"
+            @addComponent="addComponentUse"
+            @updateCalculation="updateCalculationData"
+            @updateComponents="updateComponentsData"
+          /> -->
+          <router-view
+            v-if="this.$route.name === 'Components'"
+            @updateComponents="updateComponentsData"
+          />
+  
+          <router-view
+            v-if="this.$route.name === 'Info'"
+          />
+  
+          <router-view
+            v-if="this.$route.name === 'Report'"
+          />
+  
+          <router-view
+            v-if="this.$route.name === 'Home'"
+            @updateCalculation="updateCalculationData"
+            @changeCalculation="changeCalculation"
+  
+          />
+        </div>
       </div>
-    </el-col>
-  </el-row>
+    </div>
+
+  </div>
   
 </template>
 
@@ -63,7 +66,7 @@ export default {
   },
   data() {
     return {
-      loaded: false,
+      loaded: 0,
       calculation_data: [],
     }
   },
@@ -79,12 +82,12 @@ export default {
       } catch (error) {
         alert(error.response.statusText);
       }
-      console.log("end")
-      
 
       this.getComponents();
       this.getCalculations();
-      this.loaded = true;
+      this.loaded = false;
+
+      console.log( this.store.components_use)
     },
     async getCalculations() {
       if(!this.store.user_info.authenticated){
@@ -130,6 +133,7 @@ export default {
       }
       this.store.current_calculation = this.store.calculations[0].id
       this.getCalculationComponents();
+      console.log(this.store.components_use)
     },
     async getCalculationComponents() {
 
@@ -142,6 +146,7 @@ export default {
         console.log("error")
         alert(error.response.statusText);
       }
+      this.loaded++;
     },
     async getComponents() {
 
@@ -153,16 +158,17 @@ export default {
         alert(error.response.statusText);
       }
 
-      if(!this.store.user_info.authenticated)
-        return
-        
-      endpoint = "/api/component/";
-      try {
-        const response = await axios.get(endpoint);
-        this.store.components.user = response.data;
-      } catch (error) {
-        alert(error.response.statusText);
+      if(this.store.user_info.authenticated)
+      {
+        endpoint = "/api/component/";
+        try {
+          const response = await axios.get(endpoint);
+          this.store.components.user = response.data;
+        } catch (error) {
+          alert(error.response.statusText);
+        }
       }
+      this.loaded++;
     },
     getIndexByID(data){
       return this.calculation_data.findIndex(obj => obj.id === data.id);
@@ -187,10 +193,28 @@ export default {
 
   }
 }
-
 </script>
 
 <style>
+
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  display: flex;
+  flex-flow: column;
+  }
+
+.view-body{
+  flex: 1;
+  display: flex;
+  min-height: 100vh;
+  background-image: linear-gradient(to bottom right, #73AB95, #7CD4AC);
+  align-items: center;
+  justify-content: center;
+  /* background-color: rgb(160, 225, 167); */
+}
+
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -198,13 +222,30 @@ export default {
   text-align: center;
   color: #2c3e50;
 }
+
+.box {
+
+  flex: 1;
+  display: flex;
+
+}
+
+
+
 .content {
-  border-style: solid;
+  
+  
+  border-width: 1px;
   margin-top: 25px;
   border-radius: 30px;
   padding: 100px;
   width: 21cm;
+  
+  background-color: rgb(255, 255, 255);
+  border-style: solid;
+  border-color: rgb(189, 189, 189);
 }
+
 
 .demo-radius .radius {
   height: 40px;

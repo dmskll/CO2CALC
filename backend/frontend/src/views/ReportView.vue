@@ -1,13 +1,30 @@
 <template>
   <p>Report page!</p>
+  
   <button @click="savePDF">Export to PDF</button>
   <button @click="savePDF">Export to PDF</button>
   <button @click="savePDF">Export to PDF</button>
   
   <div id="element-to-print">
     <!-- <img src="https://d27jswm5an3efw.cloudfront.net/app/uploads/2019/07/insert-image-html-3.jpg" style="width: 30%;"> -->
-    
-    <p>Hello {{ store.user_info.username }}</p>
+  
+  <div class="result-box">
+    <h3>
+      La cantidad estimada de Co2 emitida durante un consumo medio es de: 
+      <h1>
+        <b>{{ total_results.total }} KgCo2</b>
+      </h1>
+    </h3>
+    Dependiendo de la intensidad del uso y de como se ha fabricado cada componente
+    las emisiones pueden variar. En el mejor caso donde se ha emitido lo menos posible 
+    y el uso de los componentes ha sido menos intensivo se estima una emisón de 
+    <b>{{ total_results.total_bc }} KgCo2</b>. En el peor de los casos se estima que las
+    emisiones podrian llegar hasta <b>{{ total_results.total_wc }} KgCo2</b>. 
+
+  </div>
+ 
+<br><br>
+
   <table>
   <thead>
     <tr>
@@ -36,23 +53,6 @@
     </tr>
   </thead>
   <tbody>
-    <!-- <div v-for=" (use) in uses" :key="use.pk">
-      <tr>
-        <td>{{ use.component.name }} </td>
-
-        <td>{{ use.build_cost_bc }}<br></td>
-        <td>{{ use.build_cost }}</td>
-        <td>{{ use.build_cost_wc }}</td>
-        
-        <td>{{ use.use_cost_co2_bc }}</td>
-        <td>{{ use.use_cost_co2 }}</td>
-        <td>{{ use.use_cost_co2_wc }}</td>
-        
-        <td>{{ use.total_bc }}</td>
-        <td>{{ use.total }}</td>
-        <td>{{ use.total_wc }}<br></td>
-      </tr>
-    </div> -->
     <tr v-for=" (use) in uses" :key="use.pk">
       <td class="component">{{ use.component.name }} </td>
 
@@ -414,6 +414,7 @@ export default {
   created(){
     console.log('creado!!!!');
     this.uses = JSON.parse(JSON.stringify(this.store.components_use))
+    console.log(this.store.components_use);
     this.calculate();
   }
 }
@@ -455,5 +456,21 @@ td {
   background-color: #dddddd;
 } */
 
+.result-box{
+  border-radius: 15px;
 
+  background-color: #7CD4AC;
+  padding: 20px;
+  padding-top: 5px;
+  text-align: left;
+  color: rgb(9, 9, 9);
+}
+
+.result-box b{
+  color: rgb(255, 255, 255);
+}
+
+.result-box h1 {
+  text-align: center;
+}
 </style>
