@@ -84,12 +84,8 @@ class ComponentUsageListCreateAPIView(generics.ListCreateAPIView):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer, calc)
         headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)    
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers) 
     
-    def perform_create(self, serializer, calc):
-        serializer.save(calculation=calc)
-
-
     def get_queryset(self):
         if self.request.user.is_authenticated:
             calc_pk = self.kwargs.get("calc_pk")
@@ -110,7 +106,7 @@ class CalculationDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CalculationSerializer
     permission_classes = [IsOwner]
     
-
+    
 class CalculationListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = CalculationSerializer
     permission_classes = [IsOwner]

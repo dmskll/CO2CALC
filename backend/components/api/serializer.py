@@ -7,6 +7,15 @@ class ComponentSerializer(serializers.ModelSerializer):
     owner = serializers.StringRelatedField(read_only=True)
     system_component = serializers.BooleanField(read_only=True)
 
+    # Define un campo DecimalField personalizado para asegurarte de que se serialice como número
+    worse_case = serializers.DecimalField(max_digits=7, decimal_places=2, coerce_to_string=False)
+    best_case = serializers.DecimalField(max_digits=7, decimal_places=2, coerce_to_string=False)
+    middle_case = serializers.DecimalField(max_digits=7, decimal_places=2, coerce_to_string=False)
+    cfp = serializers.DecimalField(max_digits=7, decimal_places=2, coerce_to_string=False)
+    cfp_build_phase = serializers.DecimalField(max_digits=7, decimal_places=2, coerce_to_string=False)
+    cfp_deviation_standard = serializers.DecimalField(max_digits=7, decimal_places=2, coerce_to_string=False)
+
+
     class Meta:
         model = Component
         fields = '__all__'

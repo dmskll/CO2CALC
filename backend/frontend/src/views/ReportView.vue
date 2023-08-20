@@ -3,21 +3,22 @@
   <button @click="savePDF">Export to PDF</button>
   <button @click="savePDF">Export to PDF</button>
   <button @click="savePDF">Export to PDF</button>
-
+  
   <div id="element-to-print">
-  <img src="https://d27jswm5an3efw.cloudfront.net/app/uploads/2019/07/insert-image-html-3.jpg" style="width: 30%;">
-
+    <!-- <img src="https://d27jswm5an3efw.cloudfront.net/app/uploads/2019/07/insert-image-html-3.jpg" style="width: 30%;"> -->
+    
+    <p>Hello {{ store.user_info.username }}</p>
   <table>
   <thead>
     <tr>
-      <th  rowspan="3">componete</th>
-      <th  colspan="9">fases</th>
-      <th  colspan="3" rowspan="2">total</th>
+      <th  rowspan="3">Component</th>
+      <th  colspan="9">Fases</th>
+      <th  colspan="3" rowspan="2">Total</th>
     </tr>
     <tr>
-      <th  colspan="3">fabricación</th>
-      <th  colspan="3">uso</th>
-      <th  colspan="3">destrucción<br></th>
+      <th  colspan="3">Fabricación</th>
+      <th  colspan="3">Uso</th>
+      <th  colspan="3">Destrucción<br></th>
     </tr>
     <tr>
       <th>▼</th>
@@ -53,7 +54,7 @@
       </tr>
     </div> -->
     <tr v-for=" (use) in uses" :key="use.pk">
-      <td>{{ use.component.name }} </td>
+      <td class="component">{{ use.component.name }} </td>
 
       <td>{{ use.build_cost_bc }}<br></td>
       <td>{{ use.build_cost }}</td>
@@ -72,26 +73,26 @@
       <td>{{ use.total_wc }}<br></td>
     </tr>
     
-    <tr>
-      <td>total</td>
-      <td><br></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td><br></td>
+    <tr class="total">
+      <td><b>Total</b></td>
+      <td>{{ total_results.build_cost_bc }}<br></td>
+      <td>{{ total_results.build_cost }}</td>
+      <td>{{ total_results.build_cost_wc }}</td>
+      <td>{{ total_results.use_cost_co2_bc }}</td>
+      <td>{{ total_results.use_cost_co2 }}</td>
+      <td>{{ total_results.use_cost_co2_wc }}</td>
+      <td>{{ total_results.destroy_cost_wc }}</td>
+      <td>{{ total_results.destroy_cost }}</td>
+      <td>{{ total_results.destroy_cost_wc }}</td>
+      <td>{{ total_results.total_bc }}</td>
+      <td>{{ total_results.total }}</td>
+      <td>{{ total_results.total_wc }}<br></td>
     </tr>
 
   </tbody>
 </table>
 
-<table>
+<!-- <table>
   <thead>
     <tr>
       <th  rowspan="2">componete</th>
@@ -114,7 +115,6 @@
     </tr>
     <tr>
       <td>componete2</td>
-      <td>2</td>
       <td>2</td>
       <td>2</td>
       <td>6</td>
@@ -172,9 +172,8 @@
     </tr>
 
   </tbody>
-</table>
+</table> -->
   
-  <p>Hello {{ store.user_info.username }}</p>
   <div class="html2pdf__page-break"></div>
 
   <div v-for=" (use) in uses" :key="use.pk" style="margin-bottom: 50px">
@@ -225,6 +224,7 @@ export default {
       end_life_exp: "\\textbf{Coste destrucción}= (\\text{Coste fabricacion en el proyecto} +  \\text{Coste de uso})\\cdot 0.01",
 
       uses: [],
+      total_results: {},
       kgCO2_Wh: 259/1000000,
       useful_hours: {
                       string: "8*5*48*6",
@@ -255,6 +255,24 @@ export default {
       return component[0];
     },
     calculate(){
+      //this.uses["total"] = {};
+      this.total_results = {
+        "build_cost": 0,
+        "use_cost": 0,
+        "use_cost_co2": 0,
+        "destroy_cost": 0,
+        "total": 0,
+        "build_cost_wc": 0,
+        "use_cost_wc": 0,
+        "use_cost_co2_wc": 0,
+        "destroy_cost_wc": 0,
+        "total_wc": 0,
+        "build_cost_bc": 0,
+        "use_cost_bc": 0,
+        "use_cost_co2_bc": 0,
+        "destroy_cost_bc": 0,
+        "total_bc": 0,
+      }
       for (const i in this.uses){
         var use = this.uses[i];
         console.log(i)
@@ -291,7 +309,17 @@ export default {
         use["total_bc"] = use["destroy_cost_bc"] + use["use_cost_co2_bc"] + use["build_cost_bc"];        
 
         use["component"] = component;
+        this.sum_results(use);
         this.uses[i] = use;
+
+      }
+    },
+    sum_results(use){
+      for (var key in this.total_results){
+        if (Object.prototype.hasOwnProperty.call(this.total_results, key)) {
+          this.total_results[key] += use[key];
+          this.total_results[key] = parseFloat(this.total_results[key].toFixed(2))
+        } 
       }
     },
     use_percentaje(use) {
@@ -397,7 +425,13 @@ table {
   font-size:80%;
   border-collapse: collapse;
   width: 20%;
+  margin-left: auto;
+  margin-right: auto;
   
+}
+
+.component {
+  font-size:80%;
 }
 
 th {
@@ -408,6 +442,11 @@ th {
 
 td {
   border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+.total {
+  border: 2px solid #343333;
   text-align: left;
   padding: 8px;
 }

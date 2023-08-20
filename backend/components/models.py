@@ -29,15 +29,15 @@ class Component(models.Model):
     description             = models.CharField(max_length=200)
     worse_case               = models.DecimalField(max_digits=5, decimal_places=2,
                                                   validators=[MinValueValidator(0)])
-    best_case      = models.DecimalField(max_digits=5, decimal_places=2,
+    best_case      = models.DecimalField(max_digits=7, decimal_places=2,
                                                   validators=[MinValueValidator(0)])
-    middle_case     = models.DecimalField(max_digits=5, decimal_places=2,
+    middle_case     = models.DecimalField(max_digits=7, decimal_places=2,
                                                   validators=[MinValueValidator(0)])
-    cfp                     = models.DecimalField(max_digits=5, decimal_places=2,
+    cfp                     = models.DecimalField(max_digits=7, decimal_places=2,
                                                   validators=[MinValueValidator(0)])
-    cfp_build_phase           = models.DecimalField(max_digits=5, decimal_places=2,
+    cfp_build_phase           = models.DecimalField(max_digits=7, decimal_places=2,
                                                   validators=[MinValueValidator(0)])
-    cfp_deviation_standard  = models.DecimalField(max_digits=5, decimal_places=2,
+    cfp_deviation_standard  = models.DecimalField(max_digits=7, decimal_places=2,
                                                   validators=[MinValueValidator(0)])
 
     def __str__(self):
