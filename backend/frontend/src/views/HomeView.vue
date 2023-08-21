@@ -20,34 +20,25 @@
     <div v-for="(used_component, index) in this.store.components_use" :key="used_component.pk">
       <div class="hw-collapse">
         <el-card>
-
-
               <el-dropdown>
                   <el-button class="button" text>
                    ⚙️
                   </el-button>
                   <template #dropdown>
                     <el-dropdown-menu>
-                      <el-dropdown-item >Cambiar componente</el-dropdown-item>
-                      <el-dropdown-item @click="router.push('/components')">Editar componente</el-dropdown-item>
+                      <el-dropdown-item @click="changeComponent(index)">Cambiar componente</el-dropdown-item>
+                      <el-dropdown-item @click="$router.push('/components')">Editar componente</el-dropdown-item>
                       <el-dropdown-item @click="removeUsedComponent(index)" divided>Eliminar uso</el-dropdown-item>
                     </el-dropdown-menu>
                   </template>
               </el-dropdown>
               <br>
-
-
-
-
               <ComponentData
                 :dialog="false"
                 :data="getComponent(used_component.component)"
                 :use="used_component"
                 @saveUse="updateData"
               />
-
-
-
         </el-card>
       </div> 
     </div>
@@ -106,6 +97,7 @@ export default {
   data() {
     return {
       dialogComponentVisible: false,
+      use_index: -1,
     }
   },
   props: ["user", "calculation_data", "calculations_data", "components", "current_calculation" ],
@@ -154,26 +146,52 @@ export default {
     generateReport(){
       router.push('/report')
     },
-    addComponent(system, index){
-      console.log("añadido!" + index);
+    async addComponent(system, index){
       const component = system ? this.store.components.system[index] : this.store.components.user[index];
 
-      const body = {
-        "component": component.id,
-        "hours": 0,
+      if(this.use_index == -1){
+        const body = {
+          "component": component.id,
+          "hours": 0,
+        }
+        let endpoint = "/api/calculation/"+ this.store.current_calculation +"/usage/"
+        await axios.post(endpoint, body)
+        .then(response => {
+          console.log(response.data);
+          this.store.components_use.push(response.data);
+        })
+        .catch(error => {
+          this.errorMessage = error.message;
+          console.error("There was an error!", error);
+        });
       }
-      let endpoint = "/api/calculation/"+ this.store.current_calculation +"/usage/"
-      axios.post(endpoint, body)
-      .then(response => {
-        console.log(response.data);
-        this.store.components_use.push(response.data);
-      })
-      .catch(error => {
-        this.errorMessage = error.message;
-        console.error("There was an error!", error);
-      });
+      else{
+        const body = {
+          "component": component.id,
+          "hours": this.store.components_use[this.use_index].hours,
+        }
+        let endpoint = "/api/usage/"+ this.store.components_use[this.use_index].id
+        await axios.put(endpoint, body)
+        .then(response => {
+          this.store.components_use[this.use_index] = response.data;
+          console.log(this.store.components_use);
+          this.$router.go()
+        })
+        .catch(error => {
+          this.errorMessage = error.message;
+          console.error("There was an error!", error);
+        });
+      }
 
+      
+      this.use_index = -1;
       this.dialogComponentVisible = false;
+    },
+    changeComponent(index)
+    {
+      this.use_index = index;
+      this.dialogComponentVisible = true;
+
     },
     changeCalculation(id){
       this.$emit('changeCalculation', id)

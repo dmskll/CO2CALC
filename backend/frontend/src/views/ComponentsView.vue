@@ -14,7 +14,7 @@
                   <template #dropdown>
                     <el-dropdown-menu>
                       <el-dropdown-item @click="editComponent" disabled>Editar</el-dropdown-item>
-                      <el-dropdown-item @click="duplicateComponent(index)">Duplicar</el-dropdown-item>
+                      <el-dropdown-item @click="duplicateComponent(index, true)">Duplicar</el-dropdown-item>
                       <el-dropdown-item @click="deleteComponent" divided disabled>Eliminar</el-dropdown-item>
                     </el-dropdown-menu>
                   </template>
@@ -38,7 +38,7 @@
                 <template #dropdown>
                   <el-dropdown-menu>
                     <el-dropdown-item @click="editComponent(index)">Editar</el-dropdown-item>
-                    <el-dropdown-item @click="duplicateComponent(index)">Duplicar</el-dropdown-item>
+                    <el-dropdown-item @click="duplicateComponent(index, false)">Duplicar</el-dropdown-item>
                     <el-dropdown-item @click="deleteComponent(index)" divided>Eliminar</el-dropdown-item>
                   </el-dropdown-menu>
                 </template>
@@ -49,14 +49,15 @@
         </el-card>
         <br>     
       </div>
-      <el-button text @click="dialogVisible = true;">
+      <el-button text @click="addNewComponent">
         +
       </el-button>
 
       <el-dialog v-model="dialogVisible"  title="Create Component">
         <ComponentData 
           v-if="dialogVisible" 
-          :data="this.dialog_component" 
+          :data="this.dialog_component"
+          :use="this.dialog_component" 
           :dialog="true"
           @close="this.dialogFormVisible = false;" 
           @save="saveComponentData"
@@ -112,12 +113,16 @@ export default {
               console.error("There was an error!", error);
             });
     },
-    duplicateComponent(index){
-      console.log("duplicate!");
-      this.dialog_component = JSON.parse(JSON.stringify(this.local_components.user[index]));
-       //borramos el elemento id para que cuando se cree uno nuevo al guardar
+    addNewComponent(){
+      this.dialogVisible = true;
+      this.dialog_component = this.new_component;
+    },
+    duplicateComponent(index, system){  
+      const component = system ? this.local_components.system[index] : this.local_components.user[index];
+      this.dialog_component = JSON.parse(JSON.stringify(component));
+      //borramos el elemento id para que cuando se cree uno nuevo al guardar
       delete this.dialog_component["id"];
-      this.dialog_component.name = this.dialog_component.name + " (copy)" 
+      this.dialog_component.name = "New Copy"
       this.dialogVisible = true;
       
     },
@@ -129,19 +134,18 @@ export default {
     saveComponentData(component){
       this.dialogVisible = false;
         
+      // El cuerpo que se enviará en el POST
         const body = {
+          "worse_case": component.worse_case,
+          "best_case": component.best_case,
+          "middle_case": component.middle_case,
+          "cfp": 0,
+          "cfp_build_phase": component.cfp,
+          "cfp_deviation_standard": component.cfp_deviation_standard,
           "name": component.name,
           "description": component.description,
-          "idle_power": component.idle_power,
-          "bad_case_idle_power": component.bad_case_idle_power,
-          "good_case_idle_power": component.good_case_idle_power,
-          "max_power": component.max_power,
-          "bad_case_max_power": component.bad_case_max_power,
-          "good_case_max_power": component.good_case_max_power,
-          "cfp": component.cfp,
-          "cfp_use_phase": "0",
-          "cfp_deviation_standard": component.cfp_deviation_standard
         };
+
         if (component.id){
           //si tiene id es un uso existente entonces hay que editarlo
           //encontramos el index en la array de usage y modificamos el elemento, 
@@ -170,7 +174,6 @@ export default {
         }
         else { //si no tiene indice significa que es un componente nuevo
 
-          console.log("no id")
           if(!this.store.user_info.authenticated){
             //le damos -1 como id para marcar que se ha creado pero que no se añade en la database
             component["id"] = "-1";
@@ -191,13 +194,21 @@ export default {
               console.error("There was an error!", error);
             });
         }
-    }
+    },
+    prepareNewComponent(){
+      this.new_component = JSON.parse(JSON.stringify(this.local_components.system[0]));
+      
+      // borramos la id para indicar que tiene que crearse un componente nuevo
+      delete this.new_component['id'];
+      
+      Object.keys(this.new_component).forEach((key) => {
+        this.new_component[key] = null
+      });
+      this.new_component["system_component"] = false;
+    },
   },
-  oncreate(){
-    this.new_component = this.local_components.system[0],
-    Object.keys(this.new_component).forEach((key) => {
-      this.new_component[key] = null
-    });
+  created(){
+    this.prepareNewComponent()
   }
 }
 </script>

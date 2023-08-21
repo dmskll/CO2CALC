@@ -1,33 +1,42 @@
 <template>
 
   <div style="display: flex;  justify-content: center;">
-    <div style="flex: 1; text-align: left;">
-      {{ local_data.name }}
-      <el-form
-        :model="local_data"
-        style="max-width: 300px"
-        :disabled="!dialog"
-      >
-    <el-input
-      v-model="local_data.description"
-      type="textarea"
-      autosize
-      placeholder="Please input"
-      style="margin-top: 10px;"
-    />
+    <div style="flex: 1; text-align: left;" >
+      <p v-if="!dialog">{{ local_data.name }}</p>
+    <el-form
+      :model="local_data"
+      style="max-width: 300px"
+      :disabled="!dialog"
+    >
+      <el-input
+        v-if="dialog"
+        v-model="local_data.name"
+        type="textarea"
+        autosize
+        placeholder="Nombre"
+        style="margin-top: 10px;"
+      />
+      <el-input
+        v-model="local_data.description"
+        type="textarea"
+        autosize
+        placeholder="Descripcción"
+        style="margin-top: 10px;"
+      />
     </el-form>
     </div>
     <div style="flex: 1">
-      <el-form-item label="horas usadas">
+      <el-form-item label="horas usadas" v-if="!dialog">
             <el-input-number v-model="local_use.hours" @focusin="old_hours=local_use.hours" @focusout="saveUse" :precision="2" :step="0.1" :max="1000" :controls="false" />
       </el-form-item>
+      <el-checkbox v-if="dialog" v-model="checked1" label="servidor" size="large" />
     </div>
   </div>
 
 
 
 <el-collapse v-model="activeNames" @change="handleChange">
-  <el-collapse-item title="mas información" name="1">
+  <el-collapse-item title="mas información" name="1" :disabled="dialog">
   <el-row :gutter="20">
     <el-col :span="12">
       <div  style="text-align: center; margin-top:30px;">
@@ -41,7 +50,7 @@
         :disabled="!dialog"
       >
       <el-form-item label="CFP Fabricación">
-            <el-input-number v-model="local_data.cfp" :precision="2" :step="0.1" :max="1000" :controls="false" />
+            <el-input-number v-model="local_data.cfp_build_phase" :precision="2" :step="0.1" :max="1000" :controls="false" />
       </el-form-item>
       <el-form-item label="Desviación estandard">
               <el-input-number v-model="local_data.cfp_deviation_standard" :precision="2" :step="0.1" :max="1000" :controls="false" />
@@ -96,7 +105,8 @@
       return {
         local_data: JSON.parse(JSON.stringify(this.data)),
         local_use: JSON.parse(JSON.stringify(this.use)),
-        old_hours: 0
+        old_hours: 0,
+        activeNames: [],
       }
     },
     methods: {
@@ -104,8 +114,14 @@
         // si se ha modificado el campo lo enviamos
         if(this.old_hours != this.local_use.hours)
           this.$emit('saveUse', this.local_use)
+      },
+    },
+    created()
+      {
+        // si está en modo dialogo abrimos el primer y unico collapse
+        if (this.dialog)
+          this.activeNames = ['1'];
       }
-    }
   }
 </script>
 
