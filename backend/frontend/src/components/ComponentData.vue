@@ -101,6 +101,11 @@
     name: "ComponentData",
     props: ["data", "dialog", "use"],
     emits: ["saveUse", "save", "close"],
+    watch: {
+      data() {
+        this.local_data = JSON.parse(JSON.stringify(this.data))
+      },
+    },
     data() {
       return {
         local_data: JSON.parse(JSON.stringify(this.data)),

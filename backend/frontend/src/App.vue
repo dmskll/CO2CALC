@@ -1,6 +1,6 @@
 <template>
   <div id="nav" class="header">
-    <NavBar :user="user_info" />
+    <NavBar :user="store.user_info" />
   </div>
   <div class="box">
     <div class="view-body">
@@ -74,6 +74,17 @@ export default {
     NavBar
   },
   methods:{
+    async getData(){
+      try {
+        await this.getUser()
+        console.log("start proccess")
+      } catch (error) {
+        console.error("Error:", error);
+      }
+      console.log(this.store.user_info)
+      this.store.updateComponentsIsUsed();
+      
+    },
     async getUser() {
       let endpoint = "/api/user/";
       try {
@@ -83,11 +94,11 @@ export default {
         alert(error.response.statusText);
       }
 
-      this.getComponents();
-      this.getCalculations();
-      this.loaded = false;
+      console.log("start other gets")
+      await Promise.all([this.getCalculations(), this.getComponents()]);
+      console.log("end user")
 
-      console.log( this.store.components_use)
+
     },
     async getCalculations() {
       if(!this.store.user_info.authenticated){
@@ -127,29 +138,27 @@ export default {
       try {
         const response = await axios.get(endpoint);
         this.store.calculations = response.data;
-        console.log(this.store.calculations);
       } catch (error) {
         alert(error.response.statusText);
       }
-      this.store.current_calculation = this.store.calculations[0].id
-      this.getCalculationComponents();
-      console.log(this.store.components_use)
+      this.store.current_calculation = this.store.calculations[0]
+      await this.getCalculationComponents();
     },
     async getCalculationComponents() {
-
-      let endpoint = "/api/calculation/" + this.store.current_calculation + "/usage/";
+      console.log("start usage components")
+      let endpoint = "/api/calculation/" + this.store.current_calculation.id + "/usage/";
       try {
         const response = await axios.get(endpoint);
         this.store.components_use = response.data; 
-        console.log(response.data);
       } catch (error) {
         console.log("error")
         alert(error.response.statusText);
       }
+      console.log("end usage components")
       this.loaded++;
     },
     async getComponents() {
-
+      console.log("start components")
       let endpoint = "/api/component/system/";
       try {
         const response = await axios.get(endpoint);
@@ -168,6 +177,7 @@ export default {
           alert(error.response.statusText);
         }
       }
+      console.log("end components")
       this.loaded++;
     },
     getIndexByID(data){
@@ -179,18 +189,15 @@ export default {
     },
     updateComponentsData(data){
       this.components.user = data;
-      console.log("editado!")
-      console.log(this.components.user)
     },
-    changeCalculation(id){
-      this.current_calculation = id;
+    changeCalculation(index){
+      this.store.current_calculation = this.store.calculations[index];
+      this.loaded--;
       this.getCalculationComponents();
     },
   },
   created() {
-    this.getUser();
-    console.log(this.store.components)
-
+    this.getData();
   }
 }
 </script>
