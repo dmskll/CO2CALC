@@ -25,6 +25,7 @@ class Component(models.Model):
                               on_delete=models.CASCADE,
                               related_name="components")
     system_component        = models.BooleanField(default=False)
+    is_server               = models.BooleanField(default=False)
     name                    = models.CharField(max_length=30)
     description             = models.CharField(max_length=200)
     worse_case               = models.DecimalField(max_digits=5, decimal_places=2,

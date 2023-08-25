@@ -7,9 +7,9 @@
     </el-button>
 
       <el-dropdown>
-      <span class="el-dropdown-link">
+      <el-button  class="button" text>
           <font-awesome-icon icon="fa-regular fa-folder-open" size="lg" /> 
-      </span>
+      </el-button>
       <template #dropdown>
         <el-dropdown-menu >
           <div v-for="(calculation, index) in this.store.calculations" :key="calculation.pk" >

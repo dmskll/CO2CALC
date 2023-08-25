@@ -86,6 +86,9 @@ class ComponentUsageListCreateAPIView(generics.ListCreateAPIView):
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers) 
     
+    def perform_create(self, serializer, calc):        
+        serializer.save(calculation = calc)
+    
     def get_queryset(self):
         if self.request.user.is_authenticated:
             calc_pk = self.kwargs.get("calc_pk")

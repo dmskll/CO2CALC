@@ -177,28 +177,54 @@
   <div class="html2pdf__page-break"></div>
 
   <div v-for=" (use) in uses" :key="use.pk" style="margin-bottom: 50px">
-    <h1>{{ use.component.name }}</h1>
-    <h3>FABRICACION</h3>
-    <div v-katex="use_percentaje_exp"></div>
-    <div v-katex="build_cost_exp"></div>
+    <div v-if="use.component.is_server">
+      <h1>{{ use.component.name }} (Server)</h1>
+      <h3>FABRICACION</h3>
+      <div v-katex="use_percentaje_exp"></div>
+      <div v-katex="build_cost_exp"></div>
 
-    <div v-katex="use_percentaje(use)"></div>
-    <div v-katex="build_cost(use, 'middle')"></div>
-    <div v-katex="build_cost(use, 'worst')"></div>
-    <div v-katex="build_cost(use, 'best')"></div>
+      <div v-katex="use_percentaje(use)"></div>
+      <div v-katex="build_cost(use, 'middle')"></div>
+      <div v-katex="build_cost(use, 'worst')"></div>
+      <div v-katex="build_cost(use, 'best')"></div>
 
-    <h3>USO</h3>
-    <div v-katex="use_cost_exp"></div>
-    <div v-katex="use_cost(use, 'middle')"></div>
-    <div v-katex="use_cost(use, 'worst')"></div>
-    <div v-katex="use_cost(use, 'best')"></div>
+      <h3>USO</h3>
+      <div v-katex="use_cost_exp"></div>
+      <div v-katex="use_cost(use, 'middle')"></div>
+      <div v-katex="use_cost(use, 'worst')"></div>
+      <div v-katex="use_cost(use, 'best')"></div>
 
-    <h3>FIN DE CICLO DE VIDA</h3>
-    <div v-katex="end_life_exp"></div>
-    <div v-katex="destruction_cost(use, 'middle')"></div>
-    <div v-katex="destruction_cost(use, 'worst')"></div>
-    <div v-katex="destruction_cost(use, 'best')"></div>
-    <div class="html2pdf__page-break"></div>
+      <h3>FIN DE CICLO DE VIDA</h3>
+      <div v-katex="end_life_exp"></div>
+      <div v-katex="destruction_cost(use, 'middle')"></div>
+      <div v-katex="destruction_cost(use, 'worst')"></div>
+      <div v-katex="destruction_cost(use, 'best')"></div>
+      <div class="html2pdf__page-break"></div>
+    </div>
+    <div v-else>
+      <h1>{{ use.component.name }}</h1>
+      <h3>FABRICACION</h3>
+      <div v-katex="use_percentaje_exp"></div>
+      <div v-katex="build_cost_exp"></div>
+
+      <div v-katex="use_percentaje(use)"></div>
+      <div v-katex="build_cost(use, 'middle')"></div>
+      <div v-katex="build_cost(use, 'worst')"></div>
+      <div v-katex="build_cost(use, 'best')"></div>
+
+      <h3>USO</h3>
+      <div v-katex="use_cost_exp"></div>
+      <div v-katex="use_cost(use, 'middle')"></div>
+      <div v-katex="use_cost(use, 'worst')"></div>
+      <div v-katex="use_cost(use, 'best')"></div>
+
+      <h3>FIN DE CICLO DE VIDA</h3>
+      <div v-katex="end_life_exp"></div>
+      <div v-katex="destruction_cost(use, 'middle')"></div>
+      <div v-katex="destruction_cost(use, 'worst')"></div>
+      <div v-katex="destruction_cost(use, 'best')"></div>
+      <div class="html2pdf__page-break"></div>
+    </div>
   </div>
   </div>
 
@@ -226,6 +252,10 @@ export default {
       uses: [],
       total_results: {},
       kgCO2_Wh: 259/1000000,
+      server_hours: {
+                      string: "24*365*6",
+                      number: 24*365*6
+                    },
       useful_hours: {
                       string: "8*5*48*6",
                       number: 8*5*48*6,
@@ -276,43 +306,67 @@ export default {
       for (const i in this.uses){
         var use = this.uses[i];
         console.log(i)
-        const component = this.getComponent(use.component)
-        var use_percent = parseFloat(((use.hours / this.useful_hours.number)).toFixed(2));
-        use["use_percent"] = parseFloat(use_percent)
+        const component = this.getComponent(use.component);
 
-        use["build_cost"] = component.cfp_build_phase * use["use_percent"];
-        use["use_cost"] = component.middle_case * use.hours;
-        use["use_cost_co2"] = parseFloat((use["use_cost"] * this.kgCO2_Wh).toFixed(2));
-
-        var destroy_cost = (use["use_cost_co2"] + use["build_cost"]) * 0.01;
-        use["destroy_cost"] = parseFloat(destroy_cost.toFixed(2));
-        use["total"] = parseFloat((use["destroy_cost"] + use["use_cost_co2"] + use["build_cost"]).toFixed(2));
-
-        console.log("(" + component.cfp_build_phase + " + " + component.cfp_deviation_standard + ") * " + use["use_percent"])
-        use["build_cost_wc"] = (parseFloat(component.cfp_build_phase) + parseFloat(component.cfp_deviation_standard))* use["use_percent"];
-        console.log( use["build_cost_wc"])
-        use["use_cost_wc"] = component.worse_case * use.hours;
-        use["use_cost_co2_wc"] = parseFloat((use["use_cost_wc"] * this.kgCO2_Wh).toFixed(2));
-
-        var destroy_cost_wc = (use["use_cost_co2_wc"] + use["build_cost_wc"]) * 0.01;
-        use["destroy_cost_wc"] = parseFloat(destroy_cost_wc.toFixed(2));
-        use["total_wc"] =  parseFloat((use["destroy_cost_wc"] + use["use_cost_co2_wc"] + use["build_cost_wc"]).toFixed(2));
-
-        console.log(component.cfp_deviation_standard)
-        use["build_cost_bc"] = (component.cfp_build_phase - component.cfp_deviation_standard)* use["use_percent"];
-        use["use_cost_bc"] = component.best_case * use.hours;
-        use["use_cost_co2_bc"] = parseFloat((use["use_cost_bc"] * this.kgCO2_Wh).toFixed(2));
-
-
-        var destroy_cost_bc = (use["use_cost_co2_bc"] + use["build_cost_bc"]) * 0.01;
-        use["destroy_cost_bc"] = parseFloat(destroy_cost_bc.toFixed(2));
-        use["total_bc"] = use["destroy_cost_bc"] + use["use_cost_co2_bc"] + use["build_cost_bc"];        
+        if (component.is_server)
+          this.serverCalculations(use, component);
+        else
+          this.normalCalculations(use, component);
 
         use["component"] = component;
         this.sum_results(use);
         this.uses[i] = use;
 
       }
+    },
+    round(x){
+      return parseFloat((x).toFixed(2))
+    },
+    serverCalculations(use, component){
+      use["build_cost"] = component.cfp_build_phase / 12;
+      use["server_cost"] = (component.middle_case * this.server_hours.number) / 12;
+      use["network_cost"] = (use["server_cost"] / 47) * 3;
+      use["direct_cost"] = use["server_cost"] + use["network_cost"];
+      use["use_cost"] = use["direct_cost"] * 2;
+      use["use_cost_co2"] = this.round(use["use_cost"] * this.kgCO2_Wh);
+
+      var destroy_cost = (use["use_cost_co2"] + use["build_cost"]) * 0.01;
+      use["destroy_cost"] = this.round(destroy_cost);
+      use["total"] = this.round(use["destroy_cost"] + use["use_cost_co2"] + use["build_cost"]);
+
+    },
+    normalCalculations(use, component){
+      var use_percent = parseFloat(((use.hours / this.useful_hours.number)).toFixed(2));
+      use["use_percent"] = parseFloat(use_percent)
+
+      use["build_cost"] = component.cfp_build_phase * use["use_percent"];
+      use["use_cost"] = component.middle_case * use.hours;
+      use["use_cost_co2"] = parseFloat((use["use_cost"] * this.kgCO2_Wh).toFixed(2));
+
+      var destroy_cost = (use["use_cost_co2"] + use["build_cost"]) * 0.01;
+      use["destroy_cost"] = parseFloat(destroy_cost.toFixed(2));
+      use["total"] = parseFloat((use["destroy_cost"] + use["use_cost_co2"] + use["build_cost"]).toFixed(2));
+
+      console.log("(" + component.cfp_build_phase + " + " + component.cfp_deviation_standard + ") * " + use["use_percent"])
+      use["build_cost_wc"] = (parseFloat(component.cfp_build_phase) + parseFloat(component.cfp_deviation_standard))* use["use_percent"];
+      console.log( use["build_cost_wc"])
+      use["use_cost_wc"] = component.worse_case * use.hours;
+      use["use_cost_co2_wc"] = parseFloat((use["use_cost_wc"] * this.kgCO2_Wh).toFixed(2));
+
+      var destroy_cost_wc = (use["use_cost_co2_wc"] + use["build_cost_wc"]) * 0.01;
+      use["destroy_cost_wc"] = parseFloat(destroy_cost_wc.toFixed(2));
+      use["total_wc"] =  parseFloat((use["destroy_cost_wc"] + use["use_cost_co2_wc"] + use["build_cost_wc"]).toFixed(2));
+
+      console.log(component.cfp_deviation_standard)
+      use["build_cost_bc"] = (component.cfp_build_phase - component.cfp_deviation_standard)* use["use_percent"];
+      use["use_cost_bc"] = component.best_case * use.hours;
+      use["use_cost_co2_bc"] = parseFloat((use["use_cost_bc"] * this.kgCO2_Wh).toFixed(2));
+
+
+      var destroy_cost_bc = (use["use_cost_co2_bc"] + use["build_cost_bc"]) * 0.01;
+      use["destroy_cost_bc"] = parseFloat(destroy_cost_bc.toFixed(2));
+      use["total_bc"] = use["destroy_cost_bc"] + use["use_cost_co2_bc"] + use["build_cost_bc"];        
+
     },
     sum_results(use){
       for (var key in this.total_results){

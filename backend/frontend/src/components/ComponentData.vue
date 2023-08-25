@@ -26,10 +26,10 @@
     </el-form>
     </div>
     <div style="flex: 1">
-      <el-form-item label="horas usadas" v-if="!dialog">
+      <el-form-item label="horas usadas" v-if="!dialog && !local_data.is_server" >
             <el-input-number v-model="local_use.hours" @focusin="old_hours=local_use.hours" @focusout="saveUse" :precision="2" :step="0.1" :max="1000" :controls="false" />
       </el-form-item>
-      <el-checkbox v-if="dialog" v-model="checked1" label="servidor" size="large" />
+      <el-checkbox v-if="dialog" v-model="local_data.is_server" label="servidor" size="large" />
     </div>
   </div>
 

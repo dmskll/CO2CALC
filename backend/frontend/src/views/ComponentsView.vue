@@ -144,6 +144,7 @@ export default {
           "cfp_deviation_standard": component.cfp_deviation_standard,
           "name": component.name,
           "description": component.description,
+          "is_server": component.is_server,
         };
 
         if (component.id){
