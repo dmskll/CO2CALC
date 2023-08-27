@@ -57,6 +57,7 @@
                 :dialog="false"
                 :data="getComponent(used_component.component)"
                 :use="used_component"
+                :show_use = "true"
                 @saveUse="updateData"
               />
         </el-card>

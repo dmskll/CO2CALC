@@ -26,7 +26,7 @@
     </el-form>
     </div>
     <div style="flex: 1">
-      <el-form-item label="horas usadas" v-if="!dialog && !local_data.is_server" >
+      <el-form-item label="horas usadas" v-if="show_use && !local_data.is_server" >
             <el-input-number v-model="local_use.hours" @focusin="old_hours=local_use.hours" @focusout="saveUse" :precision="2" :step="0.1" :max="1000" :controls="false" />
       </el-form-item>
       <el-checkbox v-if="dialog" v-model="local_data.is_server" label="servidor" size="large" />
@@ -36,7 +36,7 @@
 
 
 <el-collapse v-model="activeNames" @change="handleChange">
-  <el-collapse-item title="mas información" name="1" :disabled="dialog">
+  <el-collapse-item title="mas información" name="1" :disabled="!show_use">
   <el-row :gutter="20">
     <el-col :span="12">
       <div  style="text-align: center; margin-top:30px;">
@@ -99,7 +99,7 @@
 <script>
   export default {
     name: "ComponentData",
-    props: ["data", "dialog", "use"],
+    props: ["data", "dialog", "use", "show_use"],
     emits: ["saveUse", "save", "close"],
     watch: {
       data() {
@@ -124,7 +124,7 @@
     created()
       {
         // si está en modo dialogo abrimos el primer y unico collapse
-        if (this.dialog)
+        if (!this.show_use)
           this.activeNames = ['1'];
       }
   }

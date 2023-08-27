@@ -2,11 +2,27 @@
     <h1>Lista de componentes</h1>
     <div style="text-align: left;">
       <h3>Componentes de pre-hechos</h3>
+      <div class="grid-container">
         <div v-for="(component, index) in local_components.system" :key="component.pk" style=" display: flex; align-items: center;justify-content: center;">
           <el-card class="box-card">
-            <template #header>
-              <div class="card-header">
-                <span>{{ component.name }}</span>
+            <div class="box-content">
+              <span class="name">{{ component.name }}</span>
+
+              <el-popover placement="bottom" :width="550" trigger="hover">
+                <template #reference>
+                  <el-button class="button" text>
+                    <font-awesome-icon icon="fa-solid fa-circle-info" size="lg" />
+                  </el-button>
+                </template>
+                <ComponentData 
+                  :data="component"
+                  :use="this.dialog_component" 
+                  :dialog="false"
+                  :show_use="false"
+                  @close="this.dialogFormVisible = false;" 
+                  @save="saveComponentData"
+                />
+              </el-popover>
                 <el-dropdown>
                   <el-button class="button" text>
                    ⚙️
@@ -19,18 +35,21 @@
                     </el-dropdown-menu>
                   </template>
                 </el-dropdown>
-              </div>
-            </template>
-            <div class="text item">{{ component.description }}</div>
+            
+            
+            </div>
           </el-card>
           <br>     
         </div>
+
+      </div>
       <h3>Tus componentes</h3>
       <div v-for="(component, index) in local_components.user" :key="component.pk" style=" display: flex; align-items: center;justify-content: center;" >
         <el-card class="box-card">
-          <template #header>
-            <div class="card-header">
               <span>{{ component.name }}</span>
+              <el-button class="button" text>
+                  ⚙️
+                </el-button>
               <el-dropdown>
                 <el-button class="button" text>
                   ⚙️
@@ -43,9 +62,6 @@
                   </el-dropdown-menu>
                 </template>
               </el-dropdown>
-            </div>
-          </template>
-          <div class="text item">{{ component.description }}</div>
         </el-card>
         <br>     
       </div>
@@ -59,6 +75,7 @@
           :data="this.dialog_component"
           :use="this.dialog_component" 
           :dialog="true"
+          :show_use="false"
           @close="this.dialogFormVisible = false;" 
           @save="saveComponentData"
         />
@@ -230,7 +247,25 @@ export default {
 }
 
 .box-card {
-  width: 480px;
+  width: 300px;
   margin-bottom: 20px;
 }
+.grid-container {
+  display: grid;
+  grid-template-columns: auto auto;
+  padding-left: 50px;
+  padding-right: 50px;
+  align-items: center;
+  justify-items: center;
+}
+
+.box-content {
+  display: flex; 
+  justify-content: space-between;
+}
+
+.name {
+    flex: 1;
+  }
+
 </style>
