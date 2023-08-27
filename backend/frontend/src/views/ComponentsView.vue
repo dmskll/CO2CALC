@@ -136,7 +136,7 @@ export default {
         
       // El cuerpo que se enviará en el POST
         const body = {
-          "worse_case": component.worse_case,
+          "worst_case": component.worst_case,
           "best_case": component.best_case,
           "middle_case": component.middle_case,
           "cfp": 0,

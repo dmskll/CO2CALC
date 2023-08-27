@@ -28,7 +28,7 @@ class Component(models.Model):
     is_server               = models.BooleanField(default=False)
     name                    = models.CharField(max_length=30)
     description             = models.CharField(max_length=200)
-    worse_case               = models.DecimalField(max_digits=5, decimal_places=2,
+    worst_case               = models.DecimalField(max_digits=5, decimal_places=2,
                                                   validators=[MinValueValidator(0)])
     best_case      = models.DecimalField(max_digits=7, decimal_places=2,
                                                   validators=[MinValueValidator(0)])

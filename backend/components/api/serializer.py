@@ -8,7 +8,7 @@ class ComponentSerializer(serializers.ModelSerializer):
     system_component = serializers.BooleanField(read_only=True)
 
     # Define un campo DecimalField personalizado para asegurarte de que se serialice como número
-    worse_case = serializers.DecimalField(max_digits=7, decimal_places=2, coerce_to_string=False)
+    worst_case = serializers.DecimalField(max_digits=7, decimal_places=2, coerce_to_string=False)
     best_case = serializers.DecimalField(max_digits=7, decimal_places=2, coerce_to_string=False)
     middle_case = serializers.DecimalField(max_digits=7, decimal_places=2, coerce_to_string=False)
     cfp = serializers.DecimalField(max_digits=7, decimal_places=2, coerce_to_string=False)

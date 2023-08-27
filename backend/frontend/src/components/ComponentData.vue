@@ -73,7 +73,7 @@
       </el-form-item>
     
       <el-form-item label="Caso pesimo">
-              <el-input-number v-model="local_data.worse_case" :precision="2" :step="0.1" :max="1000" :controls="false" />
+              <el-input-number v-model="local_data.worst_case" :precision="2" :step="0.1" :max="1000" :controls="false" />
       </el-form-item>
     
       <el-form-item label="Caso optimo">
