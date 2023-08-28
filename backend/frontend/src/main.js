@@ -4,7 +4,7 @@ import router from './router'
 
 import { createPinia } from 'pinia'
 
-import 'katex/dist/katex.min.css'
+import 'katex/dist/katex.css'
 import VueKatex from '@hsorby/vue3-katex'
 
 import ElementPlus from 'element-plus'

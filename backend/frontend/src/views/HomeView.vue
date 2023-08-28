@@ -1,7 +1,6 @@
 
 <template>
   <main>
-
     <el-button @click="addCalculation" class="button" text>
       <font-awesome-icon icon="fa-solid fa-file-circle-plus" size="lg" />   
     </el-button>
@@ -22,36 +21,41 @@
       </template>
     </el-dropdown>
     
-    <el-dropdown>
-    <el-button class="button" text>
-                ⚙️
-    </el-button>
-    <template #dropdown>
-      <el-dropdown-menu >
-        <el-dropdown-item @click="editCalculation()"> Edit </el-dropdown-item>
-        <el-dropdown-item @click="removeCalculation()" divided> Remove </el-dropdown-item>
-      </el-dropdown-menu>
-    </template>
-  </el-dropdown>
+    <h1>
+      Calculadora: {{ this.store.current_calculation.name }}
 
-
-
-    <h1>Calculadora: {{ this.store.current_calculation.name }}</h1>
-    <div v-for="(used_component, index) in this.store.components_use" :key="used_component.pk">
-      <div class="hw-collapse">
-        <el-card>
-              <el-dropdown>
-                <el-button class="button" text>
+      
+      <el-dropdown>
+      <el-button class="button" text>
                   ⚙️
-                </el-button>
-                <template #dropdown>
-                  <el-dropdown-menu>
-                    <el-dropdown-item @click="changeComponent(index)">Cambiar componente</el-dropdown-item>
-                    <el-dropdown-item @click="$router.push('/components')">Editar componente</el-dropdown-item>
-                    <el-dropdown-item @click="removeUsedComponent(index)" divided>Eliminar uso</el-dropdown-item>
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown>
+      </el-button>
+      <template #dropdown>
+        <el-dropdown-menu >
+          <el-dropdown-item @click="editCalculation()"> Edit </el-dropdown-item>
+          <el-dropdown-item @click="removeCalculation()" divided> Remove </el-dropdown-item>
+        </el-dropdown-menu>
+      </template>
+    </el-dropdown>
+  </h1>
+
+
+    <div v-for="(used_component, index) in this.store.components_use" :key="used_component.pk">
+      <div class="use-card">
+        <el-card>
+          <div style=" float: right;">
+            <el-dropdown>
+              <el-button class="button" text>
+                ⚙️
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item @click="changeComponent(index)">Cambiar componente</el-dropdown-item>
+                  <el-dropdown-item @click="$router.push('/components')">Editar componente</el-dropdown-item>
+                  <el-dropdown-item @click="removeUsedComponent(index)" divided>Eliminar uso</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </div>
               <br>
               <ComponentData
                 :dialog="false"
@@ -357,9 +361,11 @@ export default {
 
 .box-card {
   width: auto;
-  margin-bottom: 2px;
+  margin-bottom: 5px;
 }
-
+.use-card{
+  margin-bottom: 15px;
+}
 .used-component-card{
  filter: brightness(85%);
 }
