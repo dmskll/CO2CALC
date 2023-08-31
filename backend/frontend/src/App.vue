@@ -52,6 +52,8 @@
 import NavBar from "@/components/Navbar.vue"
 import { axios } from "@/common/api.service.js"
 import { useComponentsData } from "@/stores/ComponentsData"
+import { useNoAuthID } from "@/stores/NoAuthID"
+
 
 
 
@@ -59,8 +61,10 @@ export default {
   name: 'App',
   setup(){
     const store = useComponentsData();
+    const max_id = useNoAuthID();
     return {
       store: store,
+      max_id: max_id,
     }
 
   },
@@ -75,13 +79,9 @@ export default {
   },
   methods:{
     async getData(){
-      try {
-        await this.getUser()
-        console.log("start proccess")
-      } catch (error) {
-        console.error("Error:", error);
-      }
-      console.log(this.store.user_info)
+
+      await this.getUser()
+      await Promise.all([this.getCalculations(), this.getComponents()]);
       this.store.updateComponentsIsUsed();
       
     },
@@ -93,44 +93,17 @@ export default {
       } catch (error) {
         alert(error.response.statusText);
       }
-
-      console.log("start other gets")
-      await Promise.all([this.getCalculations(), this.getComponents()]);
-      console.log("end user")
-
-
     },
     async getCalculations() {
       if(!this.store.user_info.authenticated){
-        console.log("no calculos")
-        this.store.components_use = {
-          "5": {
-              "bad_case_idle_power": "3.00",
-              "bad_case_max_power": "3.00",
-              "cfp": "3.00",
-              "cfp_deviation_standard": "3.00",
-              "cfp_use_phase": "3.00",
-              "description": "hehe",
-              "good_case_idle_power": "3.00",
-              "good_case_max_power": "3.00",
-              "id": 5,
-              "idle_power": "3.00",
-              "max_power": "3.00",
-              "name": "pc dani",
-              "owner": "dani",
-              "system_component": "false",
-              "usage": [
-                  {
-                      "Description": "programación backend",
-                      "calculation": "3",
-                      "component": "5",
-                      "hours": "150",
-                      "id": "-1",
-                      "use": "50"
-                  }
-              ]
-          }
-        }
+        this.store.calculations.push({
+          "id": this.max_id.calculation,
+          "owner": null,
+          "name": "nuevo projecto"
+        })
+        this.max_id.calculation++;
+        this.store.current_calculation = this.store.calculations[0]
+        this.loaded++
         return
       }
         
@@ -145,7 +118,6 @@ export default {
       await this.getCalculationComponents();
     },
     async getCalculationComponents() {
-      console.log("start usage components")
       let endpoint = "/api/calculation/" + this.store.current_calculation.id + "/usage/";
       try {
         const response = await axios.get(endpoint);
@@ -154,11 +126,9 @@ export default {
         console.log("error")
         alert(error.response.statusText);
       }
-      console.log("end usage components")
       this.loaded++;
     },
     async getComponents() {
-      console.log("start components")
       let endpoint = "/api/component/system/";
       try {
         const response = await axios.get(endpoint);
@@ -177,7 +147,6 @@ export default {
           alert(error.response.statusText);
         }
       }
-      console.log("end components")
       this.loaded++;
     },
     getIndexByID(data){
@@ -192,8 +161,10 @@ export default {
     },
     changeCalculation(index){
       this.store.current_calculation = this.store.calculations[index];
-      this.loaded--;
-      this.getCalculationComponents();
+      if(this.store.authenticated){
+        this.loaded--;
+        this.getCalculationComponents();
+      }
     },
   },
   created() {

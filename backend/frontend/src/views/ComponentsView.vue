@@ -88,6 +88,7 @@
   import { axios } from "@/common/api.service.js"
   import ComponentData from "@/components/ComponentData.vue"
   import { useComponentsData } from "@/stores/ComponentsData"
+  import { useNoAuthID } from "@/stores/NoAuthID"
 
 
 export default {
@@ -98,8 +99,10 @@ export default {
   },
   setup(){
     const store = useComponentsData();
+    const max_id = useNoAuthID();
     return {
       store: store,
+      max_id: max_id,
     }
   },
   data() {
@@ -113,7 +116,6 @@ export default {
   },
   methods: {
     deleteComponent(index){
-      console.log("delete!")
       const id = this.local_components.user[index].id
       this.local_components.user.splice(index, 1);
         
@@ -194,9 +196,10 @@ export default {
 
           if(!this.store.user_info.authenticated){
             //le damos -1 como id para marcar que se ha creado pero que no se añade en la database
-            component["id"] = "-1";
+            component["id"] = this.max_id.component;
+            component["system_component"] = false;
             this.local_components.user.push(component);
-            console.log(this.local_components.usage)
+            this.max_id.component++;
             return
           }
 

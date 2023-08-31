@@ -502,12 +502,12 @@ export default {
       console.log(element)
       html2pdf().set(opt).from(element).save();
     },
-    getComponent(id){
-      let component = this.store.components.system.filter((item) => item.id === id);
-      
-      if(typeof component[0] === 'undefined'){
+    getComponent(id, system){
+      let component
+      if(system)
+        component = this.store.components.system.filter((item) => item.id === id);
+      else
         component = this.store.components.user.filter((item) => item.id === id)
-      }
       return component[0];
     },
     calculate(){
@@ -531,7 +531,7 @@ export default {
       }
       for (const i in this.uses){
         var use = this.uses[i];
-        const component = this.getComponent(use.component);
+        const component = this.getComponent(use.component, use.system_component);
         for (const key in cases){
           use[key] = {};
           if (component.is_server)
@@ -590,9 +590,9 @@ export default {
       const power = this.powerByCase(key, component);
       const deviation = component.cfp_deviation_standard * this.deviationByCase(key) 
 
-      use["use_percent"] = this.round(hours / this.useful_hours.number);
+      use["use_percent"] = this.round((hours / this.useful_hours.number)*100);
 
-      use["build_cost"] = this.round((component.cfp_build_phase + deviation) * use["use_percent"]);
+      use["build_cost"] = this.round((component.cfp_build_phase + deviation) * use["use_percent"]/100);
       use["use_cost"] = this.round((power * hours)/1000);
       use["use_cost_co2"] = this.round(use["use_cost"] * this.kgCO2_KWh);
 
