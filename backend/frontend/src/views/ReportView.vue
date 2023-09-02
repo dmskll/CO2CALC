@@ -574,7 +574,7 @@ export default {
       const power = this.powerByCase(key, component);
 
       use["build_cost"] = component.cfp_build_phase / 12;
-      use["server_cost"] = this.round(((power/1000) * this.server_hours.number) / 12);
+      use["server_cost"] = this.round(((power/1000) * this.server_hours.number) / component.hosted_apps);
       use["network_cost"] = this.round((use["server_cost"] / 47) * 3);
       use["direct_cost"] = use["server_cost"] + use["network_cost"];
       use["use_cost"] = this.round(use["direct_cost"] * 2);
@@ -694,6 +694,7 @@ export default {
       var name = ""
       var build_cost = use[case_type].build_cost;
       var cfp_build_phase = use.component.cfp_build_phase;
+      var app = use.component.hosted_apps;
 
       switch (case_type) {
         case 'middle':
@@ -706,7 +707,7 @@ export default {
           name = " (mejor caso)"
           break;
       }
-      return  "\\textbf{Coste fabricacion en el proyecto "+ name +"}=\\text{"+cfp_build_phase+"KgCo2} \\cdot \\text{12} = " +build_cost+"KgCo2";
+      return  "\\textbf{Coste fabricacion en el proyecto "+ name +"}=\\frac{\\text{"+cfp_build_phase+"KgCo2}}{"+app+"} = " +build_cost+"KgCo2";
     },
     destruction_cost(use, case_type) {
       var build_cost = "";

@@ -4,7 +4,6 @@ from rest_framework.views import APIView
 
 
 class IndexTemplateView(TemplateView):
-    print("hola")
     template_name = "index.html"
 
 

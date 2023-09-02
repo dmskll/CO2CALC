@@ -1,9 +1,17 @@
 <template>
     <h1>Lista de componentes</h1>
     <div style="text-align: left;">
+      
+      <ComponentGroup
+        :data="this.local_components.system"
+        :system="true"
+        @duplicate="duplicateComponent"
+        @edit="editComponent"
+        @delete="deleteComponent"
+      />
       <h3>Componentes de pre-hechos</h3>
       <div class="grid-container">
-        <div v-for="(component, index) in local_components.system" :key="component.pk" style=" display: flex; align-items: center;justify-content: center;">
+        <div v-for="(component, index) in local_components.system" :key="component.pk" >
           <el-card class="box-card">
             <div class="box-content">
               <span class="name">{{ component.name }}</span>
@@ -16,7 +24,7 @@
                 </template>
                 <ComponentData 
                   :data="component"
-                  :use="this.dialog_component" 
+                  :use="[]" 
                   :dialog="false"
                   :show_use="false"
                   @close="this.dialogFormVisible = false;" 
@@ -44,27 +52,43 @@
 
       </div>
       <h3>Tus componentes</h3>
+      <div class="grid-container">
       <div v-for="(component, index) in local_components.user" :key="component.pk" style=" display: flex; align-items: center;justify-content: center;" >
         <el-card class="box-card">
-              <span>{{ component.name }}</span>
-              <el-button class="button" text>
-                  ⚙️
-                </el-button>
-              <el-dropdown>
-                <el-button class="button" text>
-                  ⚙️
-                </el-button>
-                <template #dropdown>
-                  <el-dropdown-menu>
+          <div class="box-content">
+              <span class="name">{{ component.name }}</span>
+              <el-popover placement="bottom" :width="550" trigger="hover">
+                <template #reference>
+                  <el-button class="button" text>
+                    <font-awesome-icon icon="fa-solid fa-circle-info" size="lg" />
+                  </el-button>
+                </template>
+                <ComponentData 
+                  :data="component"
+                  :use="this.dialog_component" 
+                  :dialog="false"
+                  :show_use="false"
+                  @close="this.dialogFormVisible = false;" 
+                  @save="saveComponentData"
+                />
+              </el-popover>
+                <el-dropdown>
+                  <el-button class="button" text>
+                   ⚙️
+                  </el-button>
+                  <template #dropdown>
+                    <el-dropdown-menu>
                     <el-dropdown-item @click="editComponent(index)">Editar</el-dropdown-item>
                     <el-dropdown-item @click="duplicateComponent(index, false)">Duplicar</el-dropdown-item>
                     <el-dropdown-item @click="deleteComponent(index)" divided>Eliminar</el-dropdown-item>
                   </el-dropdown-menu>
-                </template>
-              </el-dropdown>
+                  </template>
+                </el-dropdown>
+            </div>
         </el-card>
         <br>     
       </div>
+    </div>
       <el-button text @click="addNewComponent">
         +
       </el-button>
@@ -87,15 +111,18 @@
 <script>
   import { axios } from "@/common/api.service.js"
   import ComponentData from "@/components/ComponentData.vue"
+  import ComponentGroup from "@/components/ComponentGroup.vue"
+
   import { useComponentsData } from "@/stores/ComponentsData"
   import { useNoAuthID } from "@/stores/NoAuthID"
 
 
 export default {
 
-  name: "ComponentsView",
+  name: "ComponentsView", 
   components: {
-    ComponentData
+    ComponentData,
+    ComponentGroup
   },
   setup(){
     const store = useComponentsData();
@@ -164,6 +191,7 @@ export default {
           "name": component.name,
           "description": component.description,
           "is_server": component.is_server,
+          "hosted_apps": component.hosted_apps,
         };
 
         if (component.id){
@@ -250,16 +278,19 @@ export default {
 }
 
 .box-card {
-  width: 300px;
+  width: 240px;
   margin-bottom: 20px;
 }
+
+
+
 .grid-container {
   display: grid;
-  grid-template-columns: auto auto;
-  padding-left: 50px;
-  padding-right: 50px;
-  align-items: center;
-  justify-items: center;
+  grid-template-columns: repeat(3, 1fr);;
+  padding-left: 1px;
+  padding-right: 1px;
+  grid-auto-flow: dense;
+
 }
 
 .box-content {
@@ -267,8 +298,20 @@ export default {
   justify-content: space-between;
 }
 
+.el-card .el-card__body{
+  padding: 0.4em;
+  padding-left: 0.7em;
+}
+
+.button {
+  padding: 8px !important;
+}
+
+
 .name {
+    padding-top: 0.5em;
     flex: 1;
+    font-size: 0.9em;
   }
 
 </style>

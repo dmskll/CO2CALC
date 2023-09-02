@@ -25,9 +25,12 @@ class Component(models.Model):
                               on_delete=models.CASCADE,
                               related_name="components")
     system_component        = models.BooleanField(default=False)
-    is_server               = models.BooleanField(default=False)
     name                    = models.CharField(max_length=30)
     description             = models.CharField(max_length=200)
+    is_server               = models.BooleanField(default=False)
+    hosted_apps             = models.IntegerField(default=12, 
+                                                  validators=[MinValueValidator(0),
+                                                              MaxValueValidator(50)])
     worst_case               = models.DecimalField(max_digits=5, decimal_places=2,
                                                   validators=[MinValueValidator(0)])
     best_case      = models.DecimalField(max_digits=7, decimal_places=2,
@@ -64,6 +67,8 @@ class ComponentUsage(models.Model):
                              on_delete=models.CASCADE, 
                              related_name="usage")  
     hours                   = models.IntegerField(validators=[MinValueValidator(0)])
+    server_years            = models.IntegerField(validators=[MinValueValidator(0),
+                                                              MaxValueValidator(40)])
     # use                     = models.IntegerField(validators=[MinValueValidator(0),
     #                                                           MaxValueValidator(100)])
     # Description             = models.TextField(null=True, blank=True)

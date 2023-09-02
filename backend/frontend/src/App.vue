@@ -96,13 +96,13 @@ export default {
     },
     async getCalculations() {
       if(!this.store.user_info.authenticated){
-        this.store.calculations.push({
-          "id": this.max_id.calculation,
-          "owner": null,
-          "name": "nuevo projecto"
-        })
-        this.max_id.calculation++;
-        this.store.current_calculation = this.store.calculations[0]
+        // this.store.calculations.push({
+        //   "id": this.max_id.calculation,
+        //   "owner": null,
+        //   "name": "nuevo projecto"
+        // })
+        // this.max_id.calculation++;
+        // this.store.current_calculation = this.store.calculations[0]
         this.loaded++
         return
       }
@@ -114,6 +114,11 @@ export default {
       } catch (error) {
         alert(error.response.statusText);
       }
+      if (this.store.calculations.length == 0){
+        this.loaded++;
+        return
+      }
+
       this.store.current_calculation = this.store.calculations[0]
       await this.getCalculationComponents();
     },
@@ -160,6 +165,8 @@ export default {
       this.components.user = data;
     },
     changeCalculation(index){
+      console.log(index)
+      console.log(this.store.calculations[index])
       this.store.current_calculation = this.store.calculations[index];
       if(this.store.authenticated){
         this.loaded--;
