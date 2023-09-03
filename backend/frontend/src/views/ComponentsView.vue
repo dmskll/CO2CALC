@@ -2,93 +2,30 @@
     <h1>Lista de componentes</h1>
     <div style="text-align: left;">
       
+      <h3>Componentes de pre-hechos</h3>
       <ComponentGroup
-        :data="this.local_components.system"
+        :data2="this.store.components.system"
         :system="true"
+        :selected="selected_components.system"
+        type="system"
+        @duplicate="duplicateComponent"
+        @toggleSelect="toggleSelect"
+      />
+
+      <h3>tus compas de pre-hechos</h3>
+
+
+      <ComponentGroup
+        :data2="this.store.components.user"
+        :system="false"
+        :selected="selected_components.user"
+        type="user"
         @duplicate="duplicateComponent"
         @edit="editComponent"
         @delete="deleteComponent"
+        @toggleSelect="toggleSelect"
       />
-      <h3>Componentes de pre-hechos</h3>
-      <div class="grid-container">
-        <div v-for="(component, index) in local_components.system" :key="component.pk" >
-          <el-card class="box-card">
-            <div class="box-content">
-              <span class="name">{{ component.name }}</span>
 
-              <el-popover placement="bottom" :width="550" trigger="hover">
-                <template #reference>
-                  <el-button class="button" text>
-                    <font-awesome-icon icon="fa-solid fa-circle-info" size="lg" />
-                  </el-button>
-                </template>
-                <ComponentData 
-                  :data="component"
-                  :use="[]" 
-                  :dialog="false"
-                  :show_use="false"
-                  @close="this.dialogFormVisible = false;" 
-                  @save="saveComponentData"
-                />
-              </el-popover>
-                <el-dropdown>
-                  <el-button class="button" text>
-                   ⚙️
-                  </el-button>
-                  <template #dropdown>
-                    <el-dropdown-menu>
-                      <el-dropdown-item @click="editComponent" disabled>Editar</el-dropdown-item>
-                      <el-dropdown-item @click="duplicateComponent(index, true)">Duplicar</el-dropdown-item>
-                      <el-dropdown-item @click="deleteComponent" divided disabled>Eliminar</el-dropdown-item>
-                    </el-dropdown-menu>
-                  </template>
-                </el-dropdown>
-            
-            
-            </div>
-          </el-card>
-          <br>     
-        </div>
-
-      </div>
-      <h3>Tus componentes</h3>
-      <div class="grid-container">
-      <div v-for="(component, index) in local_components.user" :key="component.pk" style=" display: flex; align-items: center;justify-content: center;" >
-        <el-card class="box-card">
-          <div class="box-content">
-              <span class="name">{{ component.name }}</span>
-              <el-popover placement="bottom" :width="550" trigger="hover">
-                <template #reference>
-                  <el-button class="button" text>
-                    <font-awesome-icon icon="fa-solid fa-circle-info" size="lg" />
-                  </el-button>
-                </template>
-                <ComponentData 
-                  :data="component"
-                  :use="this.dialog_component" 
-                  :dialog="false"
-                  :show_use="false"
-                  @close="this.dialogFormVisible = false;" 
-                  @save="saveComponentData"
-                />
-              </el-popover>
-                <el-dropdown>
-                  <el-button class="button" text>
-                   ⚙️
-                  </el-button>
-                  <template #dropdown>
-                    <el-dropdown-menu>
-                    <el-dropdown-item @click="editComponent(index)">Editar</el-dropdown-item>
-                    <el-dropdown-item @click="duplicateComponent(index, false)">Duplicar</el-dropdown-item>
-                    <el-dropdown-item @click="deleteComponent(index)" divided>Eliminar</el-dropdown-item>
-                  </el-dropdown-menu>
-                  </template>
-                </el-dropdown>
-            </div>
-        </el-card>
-        <br>     
-      </div>
-    </div>
       <el-button text @click="addNewComponent">
         +
       </el-button>
@@ -115,6 +52,8 @@
 
   import { useComponentsData } from "@/stores/ComponentsData"
   import { useNoAuthID } from "@/stores/NoAuthID"
+  import { useState } from "@/stores/State"
+
 
 
 export default {
@@ -127,8 +66,10 @@ export default {
   setup(){
     const store = useComponentsData();
     const max_id = useNoAuthID();
+    const state = useState();
     return {
       store: store,
+      state: state,
       max_id: max_id,
     }
   },
@@ -139,9 +80,20 @@ export default {
       new_component: [],
       dialog_component: [],
       dialog_component_index: 0,
+      selected_components: {
+        user: [],
+        system: []
+      }
     }
   },
   methods: {
+    toggleSelect(index, system){
+      console.log("a")
+      if(system)
+        this.selected_components.system[index] = !this.selected_components.system[index]
+      else
+        this.selected_components.user[index] = !this.selected_components.user[index]
+    },
     deleteComponent(index){
       const id = this.local_components.user[index].id
       this.local_components.user.splice(index, 1);
@@ -255,9 +207,14 @@ export default {
       });
       this.new_component["system_component"] = false;
     },
+    prepareSelectedComponents(){ //revisar para no auth
+      this.selected_components.system = new Array(this.store.components.system.length).fill(false);
+      this.selected_components.user = new Array(this.store.components.user.length).fill(false);
+    },
   },
   created(){
-    this.prepareNewComponent()
+    this.prepareNewComponent();
+    this.prepareSelectedComponents();
   }
 }
 </script>

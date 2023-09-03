@@ -30,7 +30,7 @@
             <el-input-number v-model="local_use.hours" @focusin="old_hours=local_use.hours" @focusout="saveUse" :precision="2" :step="0.1" :max="1000" :controls="false" />
       </el-form-item>
       <el-form-item label="Años de uso" v-if="show_use && local_data.is_server" >
-            <el-input-number v-model="local_use.server_years" @focusin="old_hours=local_use.server_years" @focusout="saveUse"  :min="1" :max="40" :controls="true" />
+            <el-input-number v-model="local_use.server_years" @focus="old_hours=local_use.server_years" @focusout="saveUse"  :min="1" :max="40" :controls="false" />
       </el-form-item>
       <el-checkbox v-if="dialog" v-model="local_data.is_server" label="servidor" size="large" />
     </div>
@@ -55,7 +55,7 @@
       <el-form-item label="CFP Fabricación">
             <el-input-number v-model="local_data.cfp_build_phase" :precision="2" :step="0.1" :max="1000" :controls="false" />
       </el-form-item>
-      <el-form-item label="Desviación estandard">
+      <el-form-item label="Desviación">
               <el-input-number v-model="local_data.cfp_deviation_standard" :precision="2" :step="0.1" :max="1000" :controls="false" />
       </el-form-item>
       <div  v-if="local_data.is_server" style="text-align: center; margin-top:30px;">
@@ -111,6 +111,7 @@
     emits: ["saveUse", "save", "close"],
     watch: {
       data() {
+        console.log("watch")
         this.local_data = JSON.parse(JSON.stringify(this.data));
         this.local_use = JSON.parse(JSON.stringify(this.use));
       },
@@ -128,8 +129,12 @@
         // si se ha modificado el campo lo enviamos
         if(this.local_data.is_server)
         {
+          console.log("server")
           if(this.old_hours != this.local_use.server_years)
+          {
+            console.log("emit!")
             this.$emit('saveUse', this.local_use)
+          }
         }
         else{
           if(this.old_hours != this.local_use.hours)

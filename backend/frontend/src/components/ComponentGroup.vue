@@ -2,24 +2,26 @@
 
 <div class="grid-container">
         <div v-for="(component, index) in local_data" :key="component.pk" >
-          <el-card class="box-card">
+          <el-card class="box-card" :class="{ 'box-card-selected': selected[index] && state.add_use}">
             <div class="box-content">
               <span class="name">{{ component.name }}</span>
-
-              <el-popover placement="bottom" :width="550" trigger="hover">
+              <el-popover placement="bottom" :width="550" trigger="click">
                 <template #reference>
                   <el-button class="button" text>
                     <font-awesome-icon icon="fa-solid fa-circle-info" size="lg" />
                   </el-button>
                 </template>
                 <ComponentData 
-                  :data="component"
-                  :use="[]" 
-                  :dialog="false"
-                  :show_use="false"
+                :data="component"
+                :use="[]" 
+                :dialog="false"
+                :show_use="false"
                 />
               </el-popover>
-                <el-dropdown>
+              <el-button v-if="state.add_use" class="button" @click="toggleSelected(index)" text>
+                 ⚙️
+              </el-button>
+              <el-dropdown v-else>
                   <el-button class="button" text>
                    ⚙️
                   </el-button>
@@ -36,21 +38,16 @@
                     </el-dropdown-menu>
                   </template>
                 </el-dropdown>
-            
-            
             </div>
           </el-card>
-          <br>     
         </div>
-
       </div>
-
-
 </template>
   
 
-
 <script>
+
+import { useState } from "@/stores/State"
 
 import ComponentData from "@/components/ComponentData.vue"
   export default {
@@ -58,21 +55,23 @@ import ComponentData from "@/components/ComponentData.vue"
     components: {
       ComponentData,
     },
-    props: ["data","system"],
-    watch: {
-      data() {
-        this.local_data = JSON.parse(JSON.stringify(this.data))
-      },
+    props: ["data2","components","system", "type", "selected"],
+    setup(){
+    const state = useState();
+    return {
+      state: state
+    }
+  },
+    data() {
+      return {
+        local_selected: [],
+        local_data: this.data2,
+      }
     },
-    emits: ["duplicate", "edit", "delete"],
+    emits: ["duplicate", "edit", "delete", "toggleSelect"],
     // setup(props, ctx) {
     //    ctx.emit()
     // },
-    data() {
-      return {
-        local_data: JSON.parse(JSON.stringify(this.data))
-      }
-    },
     methods:{
       duplicateComponent(index){  
         this.$emit('duplicate', index, this.system)
@@ -83,6 +82,16 @@ import ComponentData from "@/components/ComponentData.vue"
       deleteComponent(index){  
         this.$emit('delete', index)
       },
+      toggleSelected(index){
+        // console.log(index)
+        // this.local_selected[index] = !this.local_selected[index]
+        this.$emit('toggleSelect', index, this.system)
+      }
+    },
+    created(){
+      // for (const i in this.selected){
+      //   this.local_selected.push(this.selected[i])
+      
     }
     
   }
@@ -108,6 +117,10 @@ import ComponentData from "@/components/ComponentData.vue"
 .box-card {
   width: 240px;
   margin-bottom: 20px;
+}
+
+.box-card-selected {
+  outline: 2.5px solid #76ba9d !important;
 }
 
 

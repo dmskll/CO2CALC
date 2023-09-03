@@ -66,8 +66,8 @@
             </div>
             <br>
                 <ComponentData
-                :dialog="false"
-                :data="getComponent(used_component.component, used_component.system_component)"
+                  :dialog="false"
+                  :data="getComponent(used_component.component, used_component.system_component)"
                   :use="used_component"
                   :show_use = "true"
                   @saveUse="updateData"
@@ -166,6 +166,8 @@
 import ComponentData from "@/components/ComponentData.vue"
 import { useComponentsData } from "@/stores/ComponentsData"
 import { useNoAuthID } from "@/stores/NoAuthID"
+import { useState } from "@/stores/State"
+
 import { axios } from "@/common/api.service.js"
 import router from '../router';
 
@@ -175,8 +177,10 @@ export default {
   setup(){
     const store = useComponentsData();
     const max_id = useNoAuthID();
+    const state = useState();
     return {
       store: store,
+      state: state,
       max_id: max_id,
     }
 
@@ -208,6 +212,7 @@ export default {
       const body = {
         "component": data.component,
         "hours": data.hours,
+        "server_years": data.server_years,
       }
       let endpoint = "/api/usage/" + data.id
             axios.put(endpoint, body)
@@ -220,8 +225,9 @@ export default {
             });
     },
     addCalculation(){
-      this.dialogCalculationVisible = true;
-      this.dialog_calculation = { "name": null }
+      this.state.add_use = true;
+      router.push('/components')
+
     },
     editCalculation()
     {
@@ -295,11 +301,17 @@ export default {
     },
     getComponent(id, system){
       let component = null
-      if(system)
-        component = this.store.components.system.filter((item) => item.id === id);
-      else
+      if (!this.store.user_info.authenticated){
+        let type = system ?  "system" : "user"
+        component = this.store.components[type].filter((item) => item.id === id);
+        return component[0];
+      }
+
+      component = this.store.components.system.filter((item) => item.id === id);
+      if(component.length == 0)
         component = this.store.components.user.filter((item) => item.id === id)
       return component[0];
+  
     },
     getComponentName(id, system){
       return this.getComponent(id, system).name;

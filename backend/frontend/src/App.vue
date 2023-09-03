@@ -18,7 +18,6 @@
           /> -->
           <router-view
             v-if="this.$route.name === 'Components'"
-            @updateComponents="updateComponentsData"
           />
   
           <router-view
@@ -160,9 +159,6 @@ export default {
     updateCalculationData(data){
       const index = this.getIndexByID(data);
       this.calculation_data[index] = data;
-    },
-    updateComponentsData(data){
-      this.components.user = data;
     },
     changeCalculation(index){
       console.log(index)
