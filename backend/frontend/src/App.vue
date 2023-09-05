@@ -52,6 +52,8 @@ import NavBar from "@/components/Navbar.vue"
 import { axios } from "@/common/api.service.js"
 import { useComponentsData } from "@/stores/ComponentsData"
 import { useNoAuthID } from "@/stores/NoAuthID"
+import { useOperations } from "@/stores/operations"
+
 
 
 
@@ -61,9 +63,12 @@ export default {
   setup(){
     const store = useComponentsData();
     const max_id = useNoAuthID();
+    const operations = useOperations();
+
     return {
       store: store,
       max_id: max_id,
+      operations: operations
     }
 
   },
@@ -122,6 +127,7 @@ export default {
       await this.getCalculationComponents();
     },
     async getCalculationComponents() {
+      console.log(this.store.current_calculation.id)
       let endpoint = "/api/calculation/" + this.store.current_calculation.id + "/usage/";
       try {
         const response = await axios.get(endpoint);
@@ -160,11 +166,9 @@ export default {
       const index = this.getIndexByID(data);
       this.calculation_data[index] = data;
     },
-    changeCalculation(index){
-      console.log(index)
-      console.log(this.store.calculations[index])
-      this.store.current_calculation = this.store.calculations[index];
-      if(this.store.authenticated){
+    async changeCalculation(index){
+      await this.operations.changeCalculation(index)
+      if(this.store.user_info.authenticated){
         this.loaded--;
         this.getCalculationComponents();
       }

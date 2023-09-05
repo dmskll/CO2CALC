@@ -1,4 +1,21 @@
 <template>
+    <div v-if="state.add_use">
+      <el-form
+        :model="new_calculation"
+        style="max-width: 300px"
+      >
+        <el-input
+          v-model="this.new_calculation.name"
+          type="textarea"
+          autosize
+          placeholder="Nombre"
+          style="margin-top: 10px;"
+          />
+        </el-form>
+      <el-button text @click="CreateCalculation()">
+        Save
+      </el-button>
+    </div>
     <h1>Lista de componentes</h1>
     <div style="text-align: left;">
       
@@ -46,13 +63,13 @@
 </template>
 
 <script>
-  import { axios } from "@/common/api.service.js"
   import ComponentData from "@/components/ComponentData.vue"
   import ComponentGroup from "@/components/ComponentGroup.vue"
 
   import { useComponentsData } from "@/stores/ComponentsData"
   import { useNoAuthID } from "@/stores/NoAuthID"
   import { useState } from "@/stores/State"
+  import { useOperations } from "@/stores/operations"
 
 
 
@@ -67,10 +84,12 @@ export default {
     const store = useComponentsData();
     const max_id = useNoAuthID();
     const state = useState();
+    const operations = useOperations();
     return {
       store: store,
       state: state,
       max_id: max_id,
+      operations: operations,
     }
   },
   data() {
@@ -83,33 +102,38 @@ export default {
       selected_components: {
         user: [],
         system: []
+      },
+      new_calculation: {
+        name: "",
       }
     }
   },
   methods: {
-    toggleSelect(index, system){
+    async CreateCalculation(){
+      await this.operations.saveCalculation(this.new_calculation);
+      this.store.components_use = [];
+      this.createUses("system");
+      this.createUses("user");
+      this.$router.push('/') 
+
+    },
+    createUses(type){
+      for (const index in this.selected_components[type]){
+        for (let uses = 0 ; uses < this.selected_components[type][index]; uses++) {
+          const component = this.store.components[type][index];
+          this.operations.newComponentUse(component);
+       }
+      }
+    },
+    toggleSelect(index,  value, system,){
       console.log("a")
       if(system)
-        this.selected_components.system[index] = !this.selected_components.system[index]
+        this.selected_components.system[index] = value;
       else
-        this.selected_components.user[index] = !this.selected_components.user[index]
+        this.selected_components.user[index] = value;
     },
     deleteComponent(index){
-      const id = this.local_components.user[index].id
-      this.local_components.user.splice(index, 1);
-        
-      if(!this.store.user_info.authenticated)
-        return
-
-      let endpoint = "/api/component/" + id +"/";
-          axios.delete(endpoint)
-            .then(response => {
-              console.log(response);
-            })
-            .catch(error => {
-              this.errorMessage = error.message;
-              console.error("There was an error!", error);
-            });
+      this.operations.deleteComponent(index);
     },
     addNewComponent(){
       this.dialogVisible = true;
@@ -131,70 +155,7 @@ export default {
     },
     saveComponentData(component){
       this.dialogVisible = false;
-        
-      // El cuerpo que se enviará en el POST
-        const body = {
-          "worst_case": component.worst_case,
-          "best_case": component.best_case,
-          "middle_case": component.middle_case,
-          "cfp": 0,
-          "cfp_build_phase": component.cfp,
-          "cfp_deviation_standard": component.cfp_deviation_standard,
-          "name": component.name,
-          "description": component.description,
-          "is_server": component.is_server,
-          "hosted_apps": component.hosted_apps,
-        };
-
-        if (component.id){
-          //si tiene id es un uso existente entonces hay que editarlo
-          //encontramos el index en la array de usage y modificamos el elemento, 
-          //si no se encuentra el index es -1
-          
-          //console.log("id")
-          //const index = this.local_data.usage.findIndex((local_data) => local_data.id === data.id);
-          const index = this.dialog_component_index;
-          if(!this.store.user_info.authenticated){
-            this.local_components.user[index] = component;
-            return
-          }
-
-          let endpoint = "/api/component/" + component.id + "/"
-          axios.put(endpoint, body)
-          .then(response => {
-            console.log(response.data);
-            this.local_components.user[index] = component;
-          })
-          .catch(error => {
-            this.errorMessage = error.message;
-            console.error("There was an error!", error);
-          });
-
-          
-        }
-        else { //si no tiene indice significa que es un componente nuevo
-
-          if(!this.store.user_info.authenticated){
-            //le damos -1 como id para marcar que se ha creado pero que no se añade en la database
-            component["id"] = this.max_id.component;
-            component["system_component"] = false;
-            this.local_components.user.push(component);
-            this.max_id.component++;
-            return
-          }
-
-          let endpoint = "/api/component/"
-          console.log(body);
-          axios.post(endpoint, body)
-            .then(response => {
-              console.log(response.data);
-              this.local_components.user.push(response.data);
-            })
-            .catch(error => {
-              this.errorMessage = error.message;
-              console.error("There was an error!", error);
-            });
-        }
+      this.operations.saveComponentData(component, this.dialog_component_index);  
     },
     prepareNewComponent(){
       this.new_component = JSON.parse(JSON.stringify(this.local_components.system[0]));
@@ -208,8 +169,8 @@ export default {
       this.new_component["system_component"] = false;
     },
     prepareSelectedComponents(){ //revisar para no auth
-      this.selected_components.system = new Array(this.store.components.system.length).fill(false);
-      this.selected_components.user = new Array(this.store.components.user.length).fill(false);
+      this.selected_components.system = new Array(this.store.components.system.length).fill(0);
+      this.selected_components.user = new Array(this.store.components.user.length).fill(0);
     },
   },
   created(){

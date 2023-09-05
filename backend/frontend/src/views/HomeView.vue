@@ -167,6 +167,8 @@ import ComponentData from "@/components/ComponentData.vue"
 import { useComponentsData } from "@/stores/ComponentsData"
 import { useNoAuthID } from "@/stores/NoAuthID"
 import { useState } from "@/stores/State"
+import { useOperations } from "@/stores/operations"
+
 
 import { axios } from "@/common/api.service.js"
 import router from '../router';
@@ -178,10 +180,12 @@ export default {
     const store = useComponentsData();
     const max_id = useNoAuthID();
     const state = useState();
+    const operations = useOperations();
     return {
       store: store,
       state: state,
       max_id: max_id,
+      operations: operations
     }
 
   },
@@ -227,7 +231,6 @@ export default {
     addCalculation(){
       this.state.add_use = true;
       router.push('/components')
-
     },
     editCalculation()
     {
@@ -255,49 +258,7 @@ export default {
     },
     saveCalculation(){
       this.dialogCalculationVisible = false;
-      const body = {
-        "name": this.dialog_calculation.name
-      } 
-      if(this.dialog_calculation.id){
-        // el componente existe
-        this.store.current_calculation.name = body.name;
-        if(!this.store.user_info.authenticated)
-          return
-
-        let endpoint = "/api/calculation/"+ this.dialog_calculation.id + "/"
-          axios.put(endpoint, body)
-            .then(response => {
-              console.log(response.data);
-            })
-            .catch(error => {
-              this.errorMessage = error.message;
-              console.error("There was an error!", error);
-            });
-      }
-      else{
-        // el componente NO existe
-        if(!this.store.user_info.authenticated){
-          this.store.calculations.push({
-            "id": this.max_id.calculation,
-            "owner": null,
-            "name": body.name,
-           })
-           this.max_id.calculation++;
-           this.changeCalculation(this.store.calculations.length - 1);
-           return
-        } 
-
-        let endpoint = "/api/calculation/"
-        axios.post(endpoint, body)
-          .then(response => {
-            this.store.calculations.push(response.data);
-            this.changeCalculation(this.store.calculations.length - 1);
-          })
-          .catch(error => {
-            this.errorMessage = error.message;
-            console.error("There was an error!", error);
-          });
-      }
+      this.operations.saveCalculation(this.dialog_calculation)
     },
     getComponent(id, system){
       let component = null
@@ -319,36 +280,8 @@ export default {
     generateReport(){
       router.push('/report')
     },
-    async newComponentUse(component){
-      let time = component.is_server ? 6 : 0;
-      if(!this.store.user_info.authenticated){
-        this.store.components_use.push({
-          "id": this.max_id.use,
-          "system_component": component.system_component,
-          "component": component.id,
-          "hours": time,
-          "server_years": 6,
-        })
-        this.max_id.use++;
-        this.store.updateComponentsIsUsed();
-        return
-      } 
-        const body = {
-          "component": component.id,
-          "hours": time,
-          "server_years": 6,
-        }
-        let endpoint = "/api/calculation/"+ this.store.current_calculation.id +"/usage/"
-        await axios.post(endpoint, body)
-        .then(response => {
-          response.data["system_component"] = component.system_component;
-          this.store.components_use.push(response.data);
-          this.store.updateComponentsIsUsed();
-        })
-        .catch(error => {
-          this.errorMessage = error.message;
-          console.error("There was an error!", error);
-        });
+    newComponentUse(component){
+      this.operations.newComponentUse(component)
     },
     updateTime(component){
       let old_component = this.getComponent(this.store.components_use[this.use_index].component, this.store.components_use[this.use_index].system_component)
@@ -399,24 +332,31 @@ export default {
       this.$emit('changeCalculation', index)
     },
     removeUsedComponent(index){
-      this.store.components_use.splice(index, 1);
-      this.store.updateComponentsIsUsed();
 
-      if(!this.store.user_info.authenticated)
+
+      if(!this.store.user_info.authenticated){
+        this.store.components_use.splice(index, 1);
+        this.store.updateComponentsIsUsed();
         return
+      }
 
       let endpoint = "/api/usage/" + this.store.components_use[index].id;
-        axios.delete(endpoint)
-          .then(response => {
-            console.log(response);
-          })
-          .catch(error => {
-            this.errorMessage = error.message;
-            console.error("There was an error!", error);
-          });
+      axios.delete(endpoint)
+        .then(response => {
+          console.log(response);
+        })
+        .catch(error => {
+          this.errorMessage = error.message;
+          console.error("There was an error!", error);
+        });
+      this.store.components_use.splice(index, 1);
+      this.store.updateComponentsIsUsed();  
     },
     
   },
+  created(){
+    this.state.add_use = false;
+  }
 
 }
 </script>

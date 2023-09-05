@@ -2,7 +2,7 @@
 
 <div class="grid-container">
         <div v-for="(component, index) in local_data" :key="component.pk" >
-          <el-card class="box-card" :class="{ 'box-card-selected': selected[index] && state.add_use}">
+          <el-card class="box-card" :class="{ 'box-card-selected': selected[index] != 0 && state.add_use}">
             <div class="box-content">
               <span class="name">{{ component.name }}</span>
               <el-popover placement="bottom" :width="550" trigger="click">
@@ -18,9 +18,21 @@
                 :show_use="false"
                 />
               </el-popover>
-              <el-button v-if="state.add_use" class="button" @click="toggleSelected(index)" text>
-                 ⚙️
-              </el-button>
+              <div v-if="state.add_use">
+                <el-button v-if="selected[index] == 0" class="button" @click="toggleSelected(index, 1, true)" text>
+                   +
+                </el-button>
+                <el-input-number
+                  v-else
+                  v-model="local_selected[index]"
+                  style="width: 4em;"
+                  :min="0"
+                  :max="10"
+                  controls-position="right"
+                  size="small"
+                  @change="toggleSelected(index, local_selected[index], false)"
+                />
+              </div>
               <el-dropdown v-else>
                   <el-button class="button" text>
                    ⚙️
@@ -64,7 +76,7 @@ import ComponentData from "@/components/ComponentData.vue"
   },
     data() {
       return {
-        local_selected: [],
+        local_selected: [... this.selected],
         local_data: this.data2,
       }
     },
@@ -82,10 +94,11 @@ import ComponentData from "@/components/ComponentData.vue"
       deleteComponent(index){  
         this.$emit('delete', index)
       },
-      toggleSelected(index){
+      toggleSelected(index, value, new_use){
         // console.log(index)
         // this.local_selected[index] = !this.local_selected[index]
-        this.$emit('toggleSelect', index, this.system)
+        this.local_selected[index] += (new_use ? 1 : 0);
+        this.$emit('toggleSelect', index, value, this.system)
       }
     },
     created(){
@@ -115,7 +128,7 @@ import ComponentData from "@/components/ComponentData.vue"
 }
 
 .box-card {
-  width: 240px;
+  width: 15em  !important;
   margin-bottom: 20px;
 }
 
@@ -153,6 +166,9 @@ import ComponentData from "@/components/ComponentData.vue"
     padding-top: 0.5em;
     flex: 1;
     font-size: 0.9em;
+    white-space: nowrap !important; /* Evita el salto de línea */
+    overflow: hidden !important; /* Oculta el texto que no cabe en el contenedor */
+    text-overflow: ellipsis !important; /* Muestra tres puntos suspensivos (...) al final del texto cortado */
   }
 
 </style>
