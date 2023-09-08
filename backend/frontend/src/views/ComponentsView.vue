@@ -3,18 +3,44 @@
       <el-form
         :model="new_calculation"
         style="max-width: 300px"
+        label-position="top"
+        :inline="true"
       >
-        <el-input
-          v-model="this.new_calculation.name"
-          type="textarea"
-          autosize
-          placeholder="Nombre"
-          style="margin-top: 10px;"
-          />
-        </el-form>
-      <el-button text @click="CreateCalculation()">
-        Save
-      </el-button>
+
+        <el-form-item label="Nombre del projecto">
+              <el-input v-model="this.new_calculation.name"  />
+        </el-form-item>
+
+        <el-form-item label="Emisiones">
+              <el-input style="width: 80%;" v-model="this.new_calculation.emissions"  maxlength="3" @input="handleInput">
+                <template #prepend>
+                  <el-dropdown>
+                  <el-button style="width: 3.7em;">
+                    <font-awesome-icon icon="fa-regular fa-folder-open" size="lg" /> 
+                  </el-button>
+                  <template #dropdown>
+                    <el-dropdown-menu >
+                      <div v-for="(mix, index) in store.mix" :key="mix.pk" >
+
+                      <el-dropdown-item  @click="this.new_calculation.emissions=String(mix.emissions)" > 
+                        {{ mix.name }}
+                      </el-dropdown-item>
+
+                      </div>
+                    </el-dropdown-menu>
+                  </template>
+                </el-dropdown>
+                </template>
+                <template #append ><div style="font-size: 0.7em;">gCO2/kWh</div></template>
+              </el-input>
+        </el-form-item>
+        <el-button text @click="CreateCalculation()">
+          Save
+        </el-button>
+      </el-form>
+
+      
+
     </div>
     <h1>Lista de componentes</h1>
     <div style="text-align: left;">
@@ -37,7 +63,7 @@
         :system="false"
         :selected="selected_components.user"
         type="user"
-        @duplicate="duplicateComponent"
+        @duplicate="duplnumbericateComponent"
         @edit="editComponent"
         @delete="deleteComponent"
         @toggleSelect="toggleSelect"
@@ -105,10 +131,31 @@ export default {
       },
       new_calculation: {
         name: "",
+        emissions: "",
       }
     }
   },
+  watch: {
+    // 'new_calculation.mix'(newValue, oldValue) {
+    //   console.log("old")
+    //   console.log(oldValue)
+    //   console.log("new")
+    //   console.log(newValue)
+    //   // Utiliza una función de validación para asegurarte de que el valor sea numérico
+    //   const numericValue = parseFloat(newValue);
+    //   if (isNaN(numericValue)) {
+    //     // Si el valor no es numérico, establece myNumber en null
+    //     console.log("asignamos " + oldValue)
+    //     this.new_calculation.mix = oldValue;
+    //   } 
+    // }
+  },
   methods: {
+    handleInput(value) {
+      this.new_calculation.emissions = this.new_calculation.emissions.replace(/[^0-9]/g, "");
+
+      // Si el valor no es numérico, no se actualizará myNumber y el campo seguirá siendo null
+    },
     async CreateCalculation(){
       await this.operations.saveCalculation(this.new_calculation);
       this.store.components_use = [];
@@ -121,7 +168,7 @@ export default {
       for (const index in this.selected_components[type]){
         for (let uses = 0 ; uses < this.selected_components[type][index]; uses++) {
           const component = this.store.components[type][index];
-          this.operations.newComponentUse(component);
+          this.operations.newComponentUse(component, this.new_calculation.emissions);
        }
       }
     },
@@ -225,6 +272,9 @@ export default {
   padding: 8px !important;
 }
 
+.el-input-group__append{
+  padding: 0 5px;
+}
 
 .name {
     padding-top: 0.5em;

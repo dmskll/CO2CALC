@@ -66,6 +66,8 @@ class ComponentUsage(models.Model):
     calculation = models.ForeignKey(Calculation,
                              on_delete=models.CASCADE, 
                              related_name="usage")  
+    emissions = models.IntegerField(validators=[MinValueValidator(0),
+                                                              MaxValueValidator(1000)])
     hours                   = models.IntegerField(validators=[MinValueValidator(0)])
     server_years            = models.IntegerField(validators=[MinValueValidator(0),
                                                               MaxValueValidator(40)])

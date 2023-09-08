@@ -217,6 +217,7 @@ export default {
         "component": data.component,
         "hours": data.hours,
         "server_years": data.server_years,
+        "emissions": parseInt(data.emissions),
       }
       let endpoint = "/api/usage/" + data.id
             axios.put(endpoint, body)
@@ -302,6 +303,8 @@ export default {
         const body = {
           "component": component.id,
           "hours": this.store.components_use[this.use_index].hours,
+          "server_years": this.store.components_use[this.use_index].server_years,
+          "emissions": parseInt(this.store.components_use[this.use_index].emissions),
         }
         let endpoint = "/api/usage/"+ this.store.components_use[this.use_index].id
         await axios.put(endpoint, body)

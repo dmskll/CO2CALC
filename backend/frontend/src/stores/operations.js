@@ -65,7 +65,7 @@ export const useOperations = defineStore("Operations", {
         changeCalculation(index){
             this.store.current_calculation = this.store.calculations[index];
         },
-        async newComponentUse(component){
+        async newComponentUse(component, emission){
             let time = component.is_server ? 6 : 0;
             if(!this.store.user_info.authenticated){
               this.store.components_use.push({
@@ -74,6 +74,7 @@ export const useOperations = defineStore("Operations", {
                 "component": component.id,
                 "hours": time,
                 "server_years": 6,
+                "emissions": parseInt(emission),
               })
               this.max_id.use++;
               this.store.updateComponentsIsUsed();
@@ -83,6 +84,7 @@ export const useOperations = defineStore("Operations", {
                 "component": component.id,
                 "hours": time,
                 "server_years": 6,
+                "emissions": parseInt(emission),
               }
               let endpoint = "/api/calculation/"+ this.store.current_calculation.id +"/usage/"
               await axios.post(endpoint, body)

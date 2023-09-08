@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "@apollo/server": "^4.7.5",
-    "@vue/cli": "^5.0.8"
-  }
-}

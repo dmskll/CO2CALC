@@ -27,11 +27,32 @@
     </div>
     <div style="flex: 1">
       <el-form-item label="Horas usadas" v-if="show_use && !local_data.is_server" >
-            <el-input-number v-model="local_use.hours" @focusin="old_hours=local_use.hours" @focusout="saveUse" :precision="2" :step="0.1" :max="1000" :controls="false" />
+            <el-input-number v-model="local_use.hours" @focusin="old_hours=local_use.hours" @focusout="saveHours" :precision="2" :step="0.1" :max="1000" :controls="false" />
       </el-form-item>
       <el-form-item label="Años de uso" v-if="show_use && local_data.is_server" >
-            <el-input-number v-model="local_use.server_years" @focus="old_hours=local_use.server_years" @focusout="saveUse"  :min="1" :max="40" :controls="false" />
+            <el-input-number v-model="local_use.server_years" @focus="old_hours=local_use.server_years" @focusout="saveHours"  :min="1" :max="40" :controls="false" />
       </el-form-item>
+      <el-input v-if="show_use" @input="handleInput" @focusin="old_emissions=local_use.emissions" @focusout="saveEmissions" v-model="local_use.emissions" maxlength="3" >
+                <template #prepend>
+                  <el-dropdown>
+                  <el-button style="width: 3.7em;">
+                    <font-awesome-icon icon="fa-regular fa-folder-open" size="lg" /> 
+                  </el-button>
+                  <template #dropdown>
+                    <el-dropdown-menu >
+                      <div v-for="(mix, index) in store.mix" :key="mix.pk" >
+
+                      <el-dropdown-item  @click="this.local_use.emissions=String(mix.emissions); saveEmissions()" > 
+                        {{ mix.name }}
+                      </el-dropdown-item>
+
+                      </div>
+                    </el-dropdown-menu>
+                  </template>
+                </el-dropdown>
+                </template>
+                <template #append ><div style="font-size: 0.7em;">gCO2/kWh</div></template>
+        </el-input>
       <el-checkbox v-if="dialog" v-model="local_data.is_server" label="servidor" size="large" />
     </div>
   </div>
@@ -105,6 +126,9 @@
 
 
 <script>
+
+import { useComponentsData } from "@/stores/ComponentsData"
+
   export default {
     name: "ComponentData",
     props: ["data", "dialog", "use", "show_use"],
@@ -116,23 +140,35 @@
         this.local_use = JSON.parse(JSON.stringify(this.use));
       },
     },
+    setup(){
+    const store = useComponentsData();
+    return {
+      store: store,
+    }
+
+  },
     data() {
       return {
         local_data: JSON.parse(JSON.stringify(this.data)),
         local_use: JSON.parse(JSON.stringify(this.use)),
         old_hours: 0,
+        old_emissions: null,
         activeNames: [],
       }
     },
     methods: {
-      saveUse(){
+      handleInput(value) {
+        // if (isNaN(value)) {
+        //   this.local_use.emissions = 0;
+        // }
+        this.local_use.emissions = this.local_use.emissions.replace(/[^0-9]/g, "");
+
+      // Si el valor no es numérico, no se actualizará myNumber y el campo seguirá siendo null
+    },
+      saveHours(){
         // si se ha modificado el campo lo enviamos
-        if(this.local_data.is_server)
-        {
-          console.log("server")
-          if(this.old_hours != this.local_use.server_years)
-          {
-            console.log("emit!")
+        if(this.local_data.is_server){
+          if(this.old_hours != this.local_use.server_years){
             this.$emit('saveUse', this.local_use)
           }
         }
@@ -141,10 +177,18 @@
             this.$emit('saveUse', this.local_use)
         }
       },
+      saveEmissions(){
+        // si se ha modificado el campo lo enviamos
+        if(this.old_emissions != this.local_use.emissions){
+          this.$emit('saveUse', this.local_use)
+        }
+      }
+
     },
     created()
       {
         // si está en modo dialogo abrimos el primer y unico collapse
+        this.local_use.emissions = String(this.local_use.emissions);
         if (!this.show_use)
           this.activeNames = ['1'];
       }

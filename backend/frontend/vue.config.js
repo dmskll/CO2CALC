@@ -18,19 +18,19 @@ https://github.com/webpack/webpack-dev-server/blob/master/migration-v4.md
 */
 
 module.exports = {
-  module: {
-    rules: [
-      // Agrega una regla para cargar archivos de MathJax
-      {
-        test: /\.js$/,
-        include: /mathjax/, // Puedes ajustar esta ruta según la ubicación de MathJax en tu proyecto
-        loader: 'expose-loader',
-        options: {
-          exposes: ['MathJax']
-        }
-      }
-    ]
-  },
+  // modules: {
+  //   rules: [
+  //     // Agrega una regla para cargar archivos de MathJax
+  //     {
+  //       test: /\.js$/,
+  //       include: /mathjax/, // Puedes ajustar esta ruta según la ubicación de MathJax en tu proyecto
+  //       loader: 'expose-loader',
+  //       options: {
+  //         exposes: ['MathJax']
+  //       }
+  //     }
+  //   ]
+  // },
   publicPath:
     process.env.NODE_ENV === "production"
       ? "/static/dist/"

@@ -24,6 +24,7 @@ urlpatterns = [
     path('api/user/', CurrentUserView.as_view(), name="get-user"),
     path('api-auth/', include('rest_framework.urls')),
 
+    
     re_path(r"^.*$", IndexTemplateView.as_view(), name="app-entry-point")
 ]
 #re_path marca todos los posibles paths y los enruta al index de vue

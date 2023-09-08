@@ -17,6 +17,16 @@ export const useComponentsData = defineStore("ComponentsData", {
             },
         calculations: [],
         current_calculation: null,
+        mix: [
+            {
+                name: "renovable 100%",
+                emissions: 0,
+            },
+            {
+                name: "mix españa",
+                emissions: 259,
+            }
+        ]
     }),
     actions: {
         updateComponentsIsUsed(){ //revisar para no auth
