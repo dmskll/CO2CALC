@@ -9,42 +9,46 @@
       </el-button>
     </div>
     <div v-else>
-      <el-button @click="addCalculation" class="button" text>
-        <font-awesome-icon icon="fa-solid fa-file-circle-plus" size="lg" />   
-      </el-button>
-      
-      <el-dropdown>
-        <el-button  class="button" text>
-          <font-awesome-icon icon="fa-regular fa-folder-open" size="lg" /> 
-        </el-button>
-        <template #dropdown>
-          <el-dropdown-menu >
-            <div v-for="(calculation, index) in this.store.calculations" :key="calculation.pk" >
-              <el-dropdown-item @click="changeCalculation(index)"> {{ calculation.name }}</el-dropdown-item>
-            </div>
-            <el-dropdown-item @click="addCalculation" divided> 
-              <font-awesome-icon icon="fa-solid fa-file-circle-plus" size="lg" />   
-            </el-dropdown-item>
-          </el-dropdown-menu>
-        </template>
-      </el-dropdown>
-      
-      <h1>
-        Calculadora: {{ this.store.current_calculation.name }}
-      
+      <div class="header-container">
+        <h1>
+          Proyecto: {{ this.store.current_calculation.name }}
         
-        <el-dropdown>
-        <el-button class="button" text>
-          ⚙️
-        </el-button>
-        <template #dropdown>
-          <el-dropdown-menu >
-            <el-dropdown-item @click="editCalculation()"> Edit </el-dropdown-item>
-            <el-dropdown-item @click="removeCalculation()" divided> Remove </el-dropdown-item>
-          </el-dropdown-menu>
-        </template>
-      </el-dropdown>
-      </h1>
+          <el-dropdown>
+            <el-button class="button" text>
+              ⚙️
+            </el-button>
+            <template #dropdown>
+              <el-dropdown-menu >
+                <el-dropdown-item @click="editCalculation()"> Edit </el-dropdown-item>
+                <el-dropdown-item @click="removeCalculation()" divided> Remove </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+        </h1>
+        
+        <div class="right-content">
+          <el-button @click="addCalculation" class="button" text>
+            <font-awesome-icon icon="fa-solid fa-file-circle-plus" size="lg" />   
+          </el-button>
+          
+          <el-dropdown>
+            <el-button  class="button" text>
+              <font-awesome-icon icon="fa-regular fa-folder-open" size="lg" /> 
+            </el-button>
+            <template #dropdown>
+              <el-dropdown-menu >
+                <div v-for="(calculation, index) in this.store.calculations" :key="calculation.pk" >
+                  <el-dropdown-item @click="changeCalculation(index)"> {{ calculation.name }}</el-dropdown-item>
+                </div>
+                <el-dropdown-item @click="addCalculation" divided> 
+                  <font-awesome-icon icon="fa-solid fa-file-circle-plus" size="lg" />   
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+          </div>
+      </div>
+      
       
       
       <div v-for="(used_component, index) in this.store.components_use" :key="used_component.pk">
@@ -58,7 +62,7 @@
                 <template #dropdown>
                   <el-dropdown-menu>
                     <el-dropdown-item @click="changeComponent(index)">Cambiar componente</el-dropdown-item>
-                    <el-dropdown-item @click="$router.push('/components')">Editar componente</el-dropdown-item>
+                    <el-dropdown-item @click="editComponent(used_component, index)">Editar componente</el-dropdown-item>
                     <el-dropdown-item @click="removeUsedComponent(index)" divided>Eliminar uso</el-dropdown-item>
                   </el-dropdown-menu>
                 </template>
@@ -75,10 +79,10 @@
                 </el-card>
               </div> 
             </div>
-            <el-button text @click="dialogComponentVisible = true; usage_to_edit=new_usage;">
+            <el-button text @click="addComponents();">
               +
             </el-button>
-            
+        <br>
         <el-button type="primary" @click="generateReport">
           Generate Report
         </el-button>
@@ -154,25 +158,70 @@
           </el-button>
       </span>
       </el-dialog>
+
+      <el-dialog 
+        v-model="dialog_component.visible"
+        style="width: 35em;"
+        :show-close="false" 
+        :close-on-click-modal="false" 
+        title="Create Component"
+        >
+        <el-alert 
+          v-if="this.dialog_component.component.id"
+          type="info alert" 
+          title="Los cambios del componente se aplicarán a todos los usos del mismo componente" 
+        />
+        <el-alert 
+          v-else
+          type="info alert" 
+        >
+          Este componente no puede editarse directamente, cuando guardes se creará una copia en el apartado <b>tus componentes</b> 
+        </el-alert>
+      
+      <ComponentData 
+        v-if="dialog_component.visible" 
+        :data="this.dialog_component.component"
+        :use="this.dialog_component.component" 
+        :dialog="true"
+        :show_use="false"
+        @close="dialog_component.visible = false" 
+        @save="saveComponentData"
+      />
+      </el-dialog>
     </main>
-
-
-    
   </template>
 
 <script>
 
 //import ComponentColapse from "@/components/ComponentColapse.vue"
-import ComponentData from "@/components/ComponentData.vue"
+// import ComponentData from "@/components/ComponentData.vue"
 import { useComponentsData } from "@/stores/ComponentsData"
 import { useNoAuthID } from "@/stores/NoAuthID"
 import { useState } from "@/stores/State"
 import { useOperations } from "@/stores/operations"
+import { ElMessage } from 'element-plus'
 
+import LoadingC from "@/components/loadingC.vue"
+import { defineAsyncComponent } from 'vue'
 
 import { axios } from "@/common/api.service.js"
 import router from '../router';
 
+const ComponentData = defineAsyncComponent({
+  // the loader function
+  loader: () => import('@/components/ComponentData.vue'),
+
+  // A component to use while the async component is loading
+  loadingComponent: LoadingC,
+  // Delay before showing the loading component. Default: 200ms.
+  delay: 0,
+
+  // A component to use if the load fails
+  // errorComponent: ErrorComponent,
+  // The error component will be displayed if a timeout is
+  // provided and exceeded. Default: Infinity.
+  timeout: 3000
+})
 
 export default {
   name: "HomeView",
@@ -195,9 +244,15 @@ export default {
       dialogCalculationVisible: false,
       use_index: -1,
       dialog_calculation: null,
+      dialog_component:{
+        visible: false,
+        component: null,
+        index: null,
+      },
       new_calculation: {
         "name": null,
-      }
+      },
+      var_error: false,
     }
   },
   props: ["user", "calculation_data", "calculations_data", "components", "current_calculation" ],
@@ -229,9 +284,62 @@ export default {
               console.error("There was an error!", error);
             });
     },
-    addCalculation(){
+    editComponent(use, index){
+      this.state.use_index = index;
+      const component = this.getComponent(use.component, use.system_component);
+      if (component.system_component){
+        this.dialog_component.component = JSON.parse(JSON.stringify(component));
+        //borramos el elemento id para que cuando se cree uno nuevo al guardar
+        delete this.dialog_component.component["id"];
+        this.dialog_component.component.name = "New Copy";
+      }
+      else{
+        this.dialog_component.component = component;
+        this.dialog_component.index = this.store.components.user.indexOf(component);
+      }
+      this.dialog_component.visible = true;
+    },
+    validateComponent(c){
+      if(c.name === "" || c.name == null || c.cfp_build_phase == null || 
+        c.cfp_deviation_standard == null || c.middle_case == null || 
+        c.worst_case == null || c.best_case == null || c.hosted_apps == null){
+          return false;
+      }
+      return true;
+    },      
+    async saveComponentData(component){
+      if(this.validateComponent(component)){
+        this.dialog_component.visible = false;
+        await this.operations.saveComponentData(component, this.dialog_component.index);
+        if(!component.id){       
+          //REVISAR 
+          this.updateComponentUse(this.store.components.user[this.store.components.user.length -1])
+        }
+        this.dialog_component.index = null;
+      }
+      else{
+        ElMessage.error({
+            duration: 8000,
+            message: 'Has introducido valores invalidos',
+          })
+      }
+    },
+    addComponents(){
       this.state.add_use = true;
       router.push('/components')
+    },
+    addCalculation(){
+      this.state.add_calc = true;
+      router.push('/components')
+    },
+    changeComponent(index)
+    {
+      // this.use_index = index;
+      // this.dialogComponentVisible = true;
+      this.state.change_use = true;
+      this.state.use_index = index;
+      router.push('/components')
+
     },
     editCalculation()
     {
@@ -279,41 +387,54 @@ export default {
       return this.getComponent(id, system).name;
     },
     generateReport(){
+      this.var_error = false;
+      for (const index in this.store.components_use){
+        var use = this.store.components_use[index];
+        if (use.hours == null || use.server_years == null || use.emissions === ""){
+          console.log(use);
+          this.var_error = true;
+          ElMessage.error({
+            duration: 8000,
+            message: 'Has introducido valores invalidos en el tiempo de uso o en las emisiones',
+          })
+          return
+        }
+      }
       router.push('/report')
     },
     newComponentUse(component){
       this.operations.newComponentUse(component)
     },
     updateTime(component){
-      let old_component = this.getComponent(this.store.components_use[this.use_index].component, this.store.components_use[this.use_index].system_component)
-      if(old_component.is_server == component.is_server)
-        return  
-      if(old_component.is_server){
-        this.store.components_use[this.use_index].hours = 0
-        return
-      }
-      this.store.components_use[this.use_index].server_years = 6;
-    },
-    async updateComponentUse(component){
-      this.updateTime(component);
-      this.store.components_use[this.use_index].component = component.id;
-      this.store.components_use[this.use_index].system_component = component.system_component;
-      this.store.updateComponentsIsUsed();
-      if(this.store.user_info.authenticated){
-        const body = {
-          "component": component.id,
-          "hours": this.store.components_use[this.use_index].hours,
-          "server_years": this.store.components_use[this.use_index].server_years,
-          "emissions": parseInt(this.store.components_use[this.use_index].emissions),
+        let old_component = this.getComponent(this.store.components_use[this.state.use_index].component, this.store.components_use[this.state.use_index].system_component)
+        if(old_component.is_server == component.is_server)
+          return  
+        if(old_component.is_server){
+          this.store.components_use[this.state.use_index].hours = 0
+          return
         }
-        let endpoint = "/api/usage/"+ this.store.components_use[this.use_index].id
-        await axios.put(endpoint, body)
-        .catch(error => {
-          this.errorMessage = error.message;
-          console.error("There was an error!", error);
-        });
-      }
-    },
+        this.store.components_use[this.state.use_index].server_years = 6;
+      },
+      async updateComponentUse(component){
+        this.updateTime(component);
+        this.store.components_use[this.state.use_index].component = component.id;
+        this.store.components_use[this.state.use_index].system_component = component.system_component;
+        this.store.updateComponentsIsUsed();
+        if(this.store.user_info.authenticated){
+          const body = {
+            "component": component.id,
+            "hours": this.store.components_use[this.state.use_index].hours,
+            "server_years": this.store.components_use[this.state.use_index].server_years,
+            "emissions": parseInt(this.store.components_use[this.state.use_index].emissions),
+          }
+          let endpoint = "/api/usage/"+ this.store.components_use[this.state.use_index].id
+          await axios.put(endpoint, body)
+          .catch(error => {
+            this.errorMessage = error.message;
+            console.error("There was an error!", error);
+          });
+        }
+      },
     async saveComponent(system, index){
       const component = system ? this.store.components.system[index] : this.store.components.user[index];
       if(this.use_index == -1){
@@ -324,12 +445,6 @@ export default {
       }
       this.use_index = -1;
       this.dialogComponentVisible = false;
-    },
-    changeComponent(index)
-    {
-      this.use_index = index;
-      this.dialogComponentVisible = true;
-
     },
     changeCalculation(index){
       this.$emit('changeCalculation', index)
@@ -358,13 +473,26 @@ export default {
     
   },
   created(){
-    this.state.add_use = false;
+    this.state.resetState();
   }
 
 }
 </script>
 
 <style>
+
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px; /* Ajusta el espaciado según tus necesidades */
+}
+
+.right-content {
+  display: flex;
+  gap: 10px; /* Espaciado entre el botón y el menú desplegable */
+}
+
 .card-header {
   display: flex;
   justify-content: space-between;

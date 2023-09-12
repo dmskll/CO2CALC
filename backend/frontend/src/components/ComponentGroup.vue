@@ -1,57 +1,64 @@
 <template>
 
 <div class="grid-container">
-        <div v-for="(component, index) in local_data" :key="component.pk" >
-          <el-card class="box-card" :class="{ 'box-card-selected': selected[index] != 0 && state.add_use}">
-            <div class="box-content">
-              <span class="name">{{ component.name }}</span>
-              <el-popover placement="bottom" :width="550" trigger="click">
-                <template #reference>
-                  <el-button class="button" text>
-                    <font-awesome-icon icon="fa-solid fa-circle-info" size="lg" />
-                  </el-button>
-                </template>
-                <ComponentData 
-                :data="component"
-                :use="[]" 
-                :dialog="false"
-                :show_use="false"
-                />
-              </el-popover>
-              <div v-if="state.add_use">
-                <el-button v-if="selected[index] == 0" class="button" @click="toggleSelected(index, 1, true)" text>
-                   +
-                </el-button>
-                <el-input-number
-                  v-else
-                  v-model="local_selected[index]"
-                  style="width: 4em;"
-                  :min="0"
-                  :max="10"
-                  controls-position="right"
-                  size="small"
-                  @change="toggleSelected(index, local_selected[index], false)"
-                />
-              </div>
-              <el-dropdown v-else>
-                  <el-button class="button" text>
-                   ⚙️
-                  </el-button>
-                  <template #dropdown>
-                    <el-dropdown-menu v-if="system">
-                      <el-dropdown-item @click="editComponent" disabled>Editar</el-dropdown-item>
-                      <el-dropdown-item @click="duplicateComponent(index)">Duplicar</el-dropdown-item>
-                      <el-dropdown-item @click="deleteComponent" divided disabled>Eliminar</el-dropdown-item>
-                    </el-dropdown-menu>
-                    <el-dropdown-menu v-else>
-                      <el-dropdown-item @click="editComponent(index)">Editar</el-dropdown-item>
-                      <el-dropdown-item @click="duplicateComponent(index)">Duplicar</el-dropdown-item>
-                      <el-dropdown-item @click="deleteComponent(index)" divided>Eliminar</el-dropdown-item>
-                    </el-dropdown-menu>
-                  </template>
-                </el-dropdown>
-            </div>
-          </el-card>
+  <div 
+    v-for="(component, index) in local_data" 
+    :key="component.pk" 
+    :style="{ display: index_list.includes(index) || !system ? 'block' : 'none' }" 
+  >
+    <div v-if="index_list.includes(index) || !system">
+      
+      <el-card class="box-card" :class="{ 'box-card-selected': selected[index] != 0 && (state.add_calc || state.add_use)}">
+        <div class="box-content">
+          <span class="name">{{ component.name }}</span>
+          <el-popover placement="bottom" :width="550" trigger="click">
+            <template #reference>
+              <el-button class="button" text>
+                <font-awesome-icon icon="fa-solid fa-circle-info" size="lg" />
+              </el-button>
+            </template>
+            <ComponentData 
+            :data="component"
+            :use="[]" 
+            :dialog="false"
+            :show_use="false"
+            />
+          </el-popover>
+          <el-dropdown v-if="selected[index] == 0">
+              <el-button class="button" text>
+               ⚙️
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu v-if="system">
+                  <el-dropdown-item @click="editComponent" disabled>Editar</el-dropdown-item>
+                  <el-dropdown-item @click="duplicateComponent(index)">Duplicar</el-dropdown-item>
+                  <el-dropdown-item @click="deleteComponent" divided disabled>Eliminar</el-dropdown-item>
+                </el-dropdown-menu>
+                <el-dropdown-menu v-else>
+                  <el-dropdown-item @click="editComponent(index)">Editar</el-dropdown-item>
+                  <el-dropdown-item @click="duplicateComponent(index)">Duplicar</el-dropdown-item>
+                  <el-dropdown-item @click="deleteComponent(index)" divided>Eliminar</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          <div v-if="state.add_calc || state.add_use || state.change_use">
+            <el-button v-if="selected[index] == 0" class="button" @click="toggleSelected(index, 1, true)" text>
+               +
+            </el-button>
+            <el-input-number
+              v-else
+              v-model="local_selected[index]"
+              style="width: 4em; margin-top: 0.25em;"
+              :min="0"
+              :max="10"
+              controls-position="right"
+              size="small"
+              @change="toggleSelected(index, local_selected[index], false)"
+            />
+          </div>
+        </div>
+      </el-card>
+          </div>
         </div>
       </div>
 </template>
@@ -60,20 +67,57 @@
 <script>
 
 import { useState } from "@/stores/State"
+import { defineAsyncComponent } from 'vue'
 
-import ComponentData from "@/components/ComponentData.vue"
+const ComponentData = defineAsyncComponent({
+  // the loader function
+  loader: () => import('@/components/ComponentData.vue'),
+
+  // A component to use while the async component is loading
+  // loadingComponent: LoadingComponent,
+  // Delay before showing the loading component. Default: 200ms.
+  delay: 200000,
+
+  // A component to use if the load fails
+  // errorComponent: ErrorComponent,
+  // The error component will be displayed if a timeout is
+  // provided and exceeded. Default: Infinity.
+  timeout: 3000
+})
+
+
+// const ComponentData = defineAsyncComponent(() => ({
+//   loader: () => import('@/components/ComponentData.vue'),
+//   // component: import("@/components/ComponentData.vue"),
+//   // loading: LoadingComponent,
+//   // error: ErrorComponent,
+//   // The error component will be displayed if a timeout is
+//   // provided and exceeded. Default: Infinity.
+//   timeout: 3000
+// }))
+
+// import ComponentData from "@/components/ComponentData.vue"
   export default {
     name: "ComponentGroup",
     components: {
       ComponentData,
     },
-    props: ["data2","components","system", "type", "selected"],
+    props: ["data2","components","system", "type", "selected", "index_list"],
+    watch: {
+      selected: {
+        handler(){
+          console.log("cambio")
+          this.local_selected = [... this.selected]; 
+        },
+        deep: true
+      }
+    },
     setup(){
-    const state = useState();
-    return {
-      state: state
-    }
-  },
+      const state = useState();
+      return {
+        state: state
+      }
+    },
     data() {
       return {
         local_selected: [... this.selected],

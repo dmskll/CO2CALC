@@ -21,11 +21,31 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 class Component(models.Model):
+    
+    CUSTOM = "CU"
+    LAPTOP = "LA"
+    PC = "PC"
+    MONITOR = "MO"
+    SERVER = "SE"
+    EXTRA = "EX"
+    
+    TYPE_CHOICES = [
+        (CUSTOM, "Custom"),
+        (LAPTOP, "Laptop"),
+        (PC, "Pc"),
+        (MONITOR, "Monitor"),
+        (SERVER, "Server"),
+        (EXTRA, "Extra"),
+    ]
     owner = models.ForeignKey(settings.AUTH_USER_MODEL,
                               on_delete=models.CASCADE,
                               related_name="components")
     system_component        = models.BooleanField(default=False)
     name                    = models.CharField(max_length=30)
+    type                    = models.CharField(
+                                                max_length=7,
+                                                choices=TYPE_CHOICES,
+                                                default=LAPTOP)
     description             = models.CharField(max_length=200)
     is_server               = models.BooleanField(default=False)
     hosted_apps             = models.IntegerField(default=12, 
@@ -75,8 +95,8 @@ class ComponentUsage(models.Model):
     #                                                           MaxValueValidator(100)])
     # Description             = models.TextField(null=True, blank=True)
 
-    class Meta:
-        unique_together = ('component', 'calculation')
+    # class Meta:
+    #     unique_together = ('component', 'calculation')
     def __str__(self):
         return f" Component {self.component.name} used by {self.calculation.owner.username} "
 

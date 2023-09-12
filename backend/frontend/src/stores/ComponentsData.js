@@ -19,13 +19,13 @@ export const useComponentsData = defineStore("ComponentsData", {
         current_calculation: null,
         mix: [
             {
+                name: "mix españa",
+                emissions: 259,
+            },
+            {
                 name: "renovable 100%",
                 emissions: 0,
             },
-            {
-                name: "mix españa",
-                emissions: 259,
-            }
         ]
     }),
     actions: {

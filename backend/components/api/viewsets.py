@@ -29,7 +29,10 @@ class ComponentListCreateAPIView(generics.ListCreateAPIView):
     def perform_create(self, serializer):        
         owner = self.request.user
         system = self.request.user.is_superuser
-        serializer.save(owner = owner, system_component = system)
+        if not system:
+            type = Component.CUSTOM
+
+        serializer.save(owner = owner, system_component = system, type = type)
 
     def get_queryset(self):
         if self.request.user.is_authenticated:
@@ -73,12 +76,11 @@ class ComponentUsageListCreateAPIView(generics.ListCreateAPIView):
         calc_pk = kwargs.get("calc_pk")
         calc = get_object_or_404(Calculation, pk=calc_pk)
         
-        component = request.data.get("component")    
-
-        # Nos aseguramos de que no haya un  uso del mismo componente en el calculo
-        if ComponentUsage.objects.filter(component=component, calculation=calc).exists():
-            return Response({"error": "Ya existe un uso para este componente en este cálculo."},
-                            status=status.HTTP_400_BAD_REQUEST)
+        # component = request.data.get("component")    
+        # # Nos aseguramos de que no haya un  uso del mismo componente en el calculo
+        # if ComponentUsage.objects.filter(component=component, calculation=calc).exists():
+        #     return Response({"error": "Ya existe un uso para este componente en este cálculo."},
+        #                     status=status.HTTP_400_BAD_REQUEST)
         
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)

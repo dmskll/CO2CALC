@@ -98,7 +98,7 @@ export const useOperations = defineStore("Operations", {
                 console.error("There was an error!", error);
               });
         },
-        saveComponentData(component, index){
+        async saveComponentData(component, index){
            
         // El cuerpo que se enviará en el POST
             const body = {
@@ -106,12 +106,13 @@ export const useOperations = defineStore("Operations", {
             "best_case": component.best_case,
             "middle_case": component.middle_case,
             "cfp": 0,
-            "cfp_build_phase": component.cfp,
+            "cfp_build_phase": component.cfp_build_phase,
             "cfp_deviation_standard": component.cfp_deviation_standard,
             "name": component.name,
             "description": component.description,
             "is_server": component.is_server,
             "hosted_apps": component.hosted_apps,
+            "type": component.type,
             };
     
             if (component.id){
@@ -128,7 +129,7 @@ export const useOperations = defineStore("Operations", {
             }
     
             let endpoint = "/api/component/" + component.id + "/"
-            axios.put(endpoint, body)
+            await axios.put(endpoint, body)
             .then(response => {
                 console.log(response.data);
                 this.store.components.user[index] = component;
@@ -151,8 +152,7 @@ export const useOperations = defineStore("Operations", {
                 }
         
                 let endpoint = "/api/component/"
-                console.log(body);
-                axios.post(endpoint, body)
+                await axios.post(endpoint, body)
                     .then(response => {
                     console.log(response.data);
                     this.store.components.user.push(response.data);
@@ -181,5 +181,4 @@ export const useOperations = defineStore("Operations", {
                     });
         },
     }
-
 })

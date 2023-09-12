@@ -6,6 +6,7 @@ class ComponentSerializer(serializers.ModelSerializer):
     
     owner = serializers.StringRelatedField(read_only=True)
     system_component = serializers.BooleanField(read_only=True)
+    type = serializers.CharField(read_only=True)
 
     # Define un campo DecimalField personalizado para asegurarte de que se serialice como número
     worst_case = serializers.DecimalField(max_digits=7, decimal_places=2, coerce_to_string=False)

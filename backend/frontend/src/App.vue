@@ -188,14 +188,14 @@ body, html {
   height: 100%;
   display: flex;
   flex-flow: column;
-  }
+}
 
 .view-body{
   flex: 1;
   display: flex;
   min-height: 100vh;
   background-image: linear-gradient(to bottom right, #73AB95, #7CD4AC);
-  align-items: center;
+  align-items: top;
   justify-content: center;
   /* background-color: rgb(160, 225, 167); */
 }
@@ -209,21 +209,16 @@ body, html {
 }
 
 .box {
-
   flex: 1;
   display: flex;
-
 }
 
-
-
 .content {
-  
-  
   border-width: 1px;
-  margin-top: 25px;
+  margin-top: 5em;  
+  margin-bottom: 5em;
   border-radius: 30px;
-  padding: 100px;
+  padding: 50px 80px 50px 80px;
   width: 21cm;
   
   background-color: rgb(255, 255, 255);
