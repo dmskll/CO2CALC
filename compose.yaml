@@ -2,6 +2,6 @@ services:
   web: 
     build:
       context: app
-      target: builder
+      target: build
     ports: 
       - '8000:8000'
