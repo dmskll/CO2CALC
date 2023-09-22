@@ -22,9 +22,9 @@ CMD ["manage.py", "runserver", "0.0.0.0:8000"]
 EXPOSE 8080
 RUN apk add --no-cache npm
 WORKDIR /app/frontend
-COPY package*.json .
+#COPY package*.json .
 RUN npm install
-COPY . .
+#COPY . .
 RUN npm run build
 #CMD ["npm", "run", "serve"]
 

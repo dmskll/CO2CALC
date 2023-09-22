@@ -5,6 +5,8 @@ from rest_framework import generics
 from rest_framework.response import Response
 from django.http import JsonResponse
 from rest_framework import status
+from drf_yasg.utils import swagger_auto_schema
+from django.utils.decorators import method_decorator
 from rest_framework.generics import get_object_or_404
 from django.shortcuts import get_list_or_404
 from rest_framework.exceptions import PermissionDenied
@@ -16,15 +18,34 @@ from ..models import Component, ComponentUsage, Calculation
 from .serializer import ComponentSerializer, ComponentUsageSerializer, CalculationSerializer
 import json
 
-
+@swagger_auto_schema(methods=['get'])
 class ComponentDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Component.objects.all()
     serializer_class = ComponentSerializer
     permission_classes = [ComponentIsOwner]
 
+    @swagger_auto_schema(auto_schema=None)
+    def patch(self, request, *args, **kwargs):
+        return super().patch(request, *args, **kwargs)
+    
+@swagger_auto_schema(methods=['get'])
+@method_decorator(name='get', decorator=swagger_auto_schema(
+   responses={
+        200: ComponentSerializer,
+        201: "buenas",
+    }
+))
 class ComponentListCreateAPIView(generics.ListCreateAPIView):
+    """
+    get:
+    Return a list of all the existing users.
+
+    post:
+    Create a new user instance.
+    """
     serializer_class = ComponentSerializer
     permission_classes = [permissions.IsAuthenticated]
+
 
     def perform_create(self, serializer):        
         owner = self.request.user
@@ -34,17 +55,19 @@ class ComponentListCreateAPIView(generics.ListCreateAPIView):
 
         serializer.save(owner = owner, system_component = system, type = type)
 
+    @swagger_auto_schema(responses={200: "buenas"})
     def get_queryset(self):
         if self.request.user.is_authenticated:
             return Component.objects.filter(owner=self.request.user)
         else:
             return Component.objects.none()
 
-
+@swagger_auto_schema(methods=['get'])
 class SystemComponentListAPIView(generics.ListAPIView):
     queryset = Component.objects.filter(system_component=True)
     serializer_class = ComponentSerializer
     permission_classes = [IsAdminUserOrReadOnly]
+
 
 class ComponentUsageDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = ComponentUsage.objects.all()
@@ -52,11 +75,22 @@ class ComponentUsageDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     # Component usage no tiene el atributo de owner, por eso se comprueba accediendo al owner
-    # del calculo al que pertenecjsone.
+    # del calculo al que pertenece.
+    @swagger_auto_schema(responses={200: "buenas"})
     def get_queryset(self):
         if self.request.user.is_authenticated:
             usage_pk = self.kwargs.get("pk")
-            usage = get_object_or_404(ComponentUsage, pk=usage_pk) 
+            # En este casoutilizar el get_object_or_404  genera un error producir el esquema
+            # para la documentación de la api
+            try:
+                usage = ComponentUsage.objects.get(pk=usage_pk)
+            except ComponentUsage.DoesNotExist:
+                    return JsonResponse({
+                        'status_code': 404,
+                        'error': 'The resource was not found'
+                    })
+
+          
             calculation = get_object_or_404(Calculation, pk=usage.calculation.id)
 
 
@@ -64,7 +98,9 @@ class ComponentUsageDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
                 raise PermissionDenied({"detail":"You do not have permission to perform this action."})
 
             return ComponentUsage.objects.filter(id=usage_pk)
-        
+    @swagger_auto_schema(auto_schema=None)
+    def patch(self, request, *args, **kwargs):
+        return super().patch(request, *args, **kwargs)
 
 class ComponentUsageListCreateAPIView(generics.ListCreateAPIView):
     queryset = ComponentUsage.objects.all()
@@ -110,7 +146,10 @@ class CalculationDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Calculation.objects.all()
     serializer_class = CalculationSerializer
     permission_classes = [IsOwner]
-    
+
+    @swagger_auto_schema(auto_schema=None)
+    def patch(self, request, *args, **kwargs):
+        return super().patch(request, *args, **kwargs)
     
 class CalculationListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = CalculationSerializer
@@ -128,47 +167,47 @@ class CalculationListCreateAPIView(generics.ListCreateAPIView):
 
 class CalculationData(APIView):
     def get(self, request, calc_pk2):
-
-        #calc_pk = self.kwargs.get("calc_pk2")
         user = request.user
         calc = get_object_or_404(Calculation, pk=calc_pk2)
 
-        if calc.owner == user:
-            usages = get_list_or_404(ComponentUsage, calculation=calc_pk2)
-            print(usages[0].use)
-            component_uses = []
-            for use in usages:
-                json_use = {
-                    "id": use.id,
-                    "calculation": use.calculation.id,
-                    "hours": use.hours,
-                    "use": use.use,
-                    "Description": use.Description,
-                    "component": use.component.id
-                }
-                add_component = True;
-                for index, component_use in enumerate(component_uses):
-                    if use.component.id == component_use["id"]:
-                        component_uses[index]["usage"].append(json_use)
-                        add_component = False;
-                        break
-
-                if add_component:
-                    component_uses.append({
-                        "id": use.component.id,
-                        "owner": use.component.owner,
-                        "system_component": use.component.system_component,
-                        "usage": [json_use]
-                    })
-                    
-
-            json_data = json.dumps(component_uses, indent=4, default=str, sort_keys=True, ensure_ascii=False)
-            print(json_data)
-            return Response(json_data)
         #en caso de que no esté loggeado
-        return Response({
+        if calc.owner != user:
+            return Response({
             'authenticated': False
-        })
+            })
+        
+        usages = get_list_or_404(ComponentUsage, calculation=calc_pk2)
+        print(usages[0].use)
+        component_uses = []
+        for use in usages:
+            json_use = {
+                "id": use.id,
+                "calculation": use.calculation.id,
+                "hours": use.hours,
+                "use": use.use,
+                "Description": use.Description,
+                "component": use.component.id
+            }
+            add_component = True;
+            for index, component_use in enumerate(component_uses):
+                if use.component.id == component_use["id"]:
+                    component_uses[index]["usage"].append(json_use)
+                    add_component = False;
+                    break
+
+            if add_component:
+                component_uses.append({
+                    "id": use.component.id,
+                    "owner": use.component.owner,
+                    "system_component": use.component.system_component,
+                    "usage": [json_use]
+                })
+                
+
+        json_data = json.dumps(component_uses, indent=4, default=str, sort_keys=True, ensure_ascii=False)
+        print(json_data)
+        return Response(json_data)
+
         
 
 # class CalculationViewSet(APIView):

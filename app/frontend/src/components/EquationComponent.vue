@@ -1,6 +1,6 @@
 <template>
   <div v-if="show_tex">
-    <p> {{ formula }} </p>
+    <p> {{ mathDisplay(formula) }} </p>
   </div>
   <div v-else>
     <VueMathjax class="equations" :formula="mathDisplay(formula)" />
