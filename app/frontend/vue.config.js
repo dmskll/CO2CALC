@@ -40,7 +40,7 @@ module.exports = {
   pages: {
     index: {
       entry: "src/main.js",
-      title: "CFC",
+      title: "CO2Calc",
     },
   },
   devServer: {

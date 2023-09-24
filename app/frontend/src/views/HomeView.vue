@@ -2,10 +2,38 @@
 <template>
   <main>
     
-    <div v-if="store.calculations.length == 0">
-      Venga genera un calculo es divertido!
-      <el-button @click="addCalculation" class="button" text>
-        <font-awesome-icon icon="fa-solid fa-file-circle-plus" size="lg" />   
+    <div v-if="store.calculations.length == 0" style="padding: 0 5em 0 5em;">
+      <h1 style="margin: 0;">CO2Calc</h1>
+      <h3 style="margin: 0;">Calcula las emisiones de tu proyecto</h3>
+
+      <p style="text-align: justify;">
+
+        Con esta herramienta podrás estimar las emisiones asociadas a tu proyecto,
+        según los componentes usados y el consumo electrico.
+
+      </p>
+      <!-- <p style="text-align: justify;">
+
+        CO2Calc te da una serie de componentes pre-hechos que puedes consultar en la sección de componentes.
+        Puedes modificarlos o incluso crear los tuyos propios.
+
+      </p>
+
+      <p style="text-align: justify;">
+
+        Para más detalle de como se realizan los calculos o donde conseguir información para hacer tus componentes
+        ve a la sección de información
+
+      </p> -->
+      <el-alert type="info" :closable="false" style="margin-bottom: 1.3em;">
+        <p style="font-size: 1.15em; text-align: justify;">
+          Si eres un estudiante de la UPC y te gustaria guardar tus calculos, inicia sesión 
+          con tus credenciales de la universidad antes de empezar.
+        </p>
+      </el-alert>
+
+      <el-button @click="addCalculation" class="button">
+        Empezemos!  
       </el-button>
     </div>
     <div v-else>
@@ -80,12 +108,16 @@
               </div> 
             </div>
             <el-button text @click="addComponents();">
-              +
+              <font-awesome-icon icon="fa-solid fa-plus-square" size="xl" />
             </el-button>
         <br>
-        <el-button type="primary" @click="generateReport">
-          Generate Report
-        </el-button>
+        <div style="text-align: right;" >
+          <el-button  @click="generateReport" plain>
+            CALCULAR
+            <font-awesome-icon style="margin-left: 0.6em;" icon="fa-solid fa-calculator" size="xl"/>
+  
+          </el-button>
+        </div>
       </div>
       <el-dialog v-model="dialogComponentVisible"  title="Add component" width="600px">
         <el-scrollbar height="400px" style="width: auto;">

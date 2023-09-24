@@ -89,7 +89,7 @@
                     <template #prepend>
                       <el-dropdown>
                       <el-button style="width: 3.7em;">
-                        <font-awesome-icon icon="fa-regular fa-folder-open" size="lg" /> 
+                        <font-awesome-icon icon="fa-solid fa-bolt" size="lg" /> 
                       </el-button>
                       <template #dropdown>
                         <el-dropdown-menu >

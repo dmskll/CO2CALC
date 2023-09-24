@@ -43,7 +43,7 @@
             </el-dropdown>
           <div v-if="state.add_calc || state.add_use || state.change_use">
             <el-button v-if="selected[index] == 0" class="button" @click="toggleSelected(index, 1, true)" text>
-               +
+              <font-awesome-icon icon="fa-solid fa-plus" />
             </el-button>
             <el-input-number
               v-else
@@ -59,8 +59,14 @@
         </div>
       </el-card>
           </div>
-        </div>
-      </div>
+    </div>
+    <div style="padding-top: 0.4em;">
+      <el-button v-if="!system" @click="$emit('addNew')">
+          <font-awesome-icon icon="fa-solid fa-plus"/>
+          <font-awesome-icon icon="fa-solid fa-microchip" size="lg"/>
+      </el-button>
+    </div>
+  </div>
 </template>
   
 
@@ -124,7 +130,7 @@ const ComponentData = defineAsyncComponent({
         local_data: this.data2,
       }
     },
-    emits: ["duplicate", "edit", "delete", "toggleSelect"],
+    emits: ["duplicate", "edit", "delete", "toggleSelect", "addNew"],
     // setup(props, ctx) {
     //    ctx.emit()
     // },

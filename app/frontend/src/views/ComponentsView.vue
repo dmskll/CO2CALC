@@ -1,21 +1,21 @@
 <template>
 
-      <el-form
-        :model="new_calculation"
-        style="max-width: 300px"
-        label-position="top"
-      >
 
-        <el-form-item label="Nombre del projecto"  v-if="state.add_calc">
-              <el-input v-model="this.new_calculation.name"  />
-        </el-form-item>
+  <el-form
+    :model="new_calculation"
+    style="max-width: 300px"
+    label-position="top"
+  >
+    <el-form-item label="Nombre del projecto"  v-if="state.add_calc">
+          <el-input v-model="this.new_calculation.name"  />
+    </el-form-item>
 
         <el-form-item label="Emisiones" v-if="state.add_use || state.add_calc">
-              <el-input style="width: 80%;" v-model="this.new_calculation.emissions"  maxlength="3" @input="handleInput">
+              <el-input style="width: 70%;" v-model="this.new_calculation.emissions"  maxlength="3" @input="handleInput">
                 <template #prepend>
                   <el-dropdown>
                   <el-button style="width: 3.7em;">
-                    <font-awesome-icon icon="fa-regular fa-folder-open" size="lg" /> 
+                    <font-awesome-icon icon="fa-solid fa-bolt" size="lg" /> 
                   </el-button>
                   <template #dropdown>
                     <el-dropdown-menu >
@@ -33,15 +33,23 @@
                 <template #append ><div style="font-size: 0.7em;">gCO2/kWh</div></template>
               </el-input>
         </el-form-item>
-      </el-form>      
+          </el-form>      
 
-    <el-button v-if="state.add_use || state.add_calc" text @click="CreateCalculation()">
-      Save
-    </el-button>
-    <h1>Lista de componentes</h1>
+
+    <h1 v-if="state.add_use || state.add_calc" style="text-align: left;">Selecciona los componentes utilizados</h1>
+    <div v-else>
+      <h1 style="text-align: left;">Lista de componentes</h1>
+      <p>
+
+      </p>
+    </div>
+    
     <div style="text-align: left;">
       
       <h3>Ordenadores</h3>
+      <p>
+        Selecciona que tipo de ordenador has utilizado para realizar el proyecto. 
+      </p>
       <ComponentGroup
         :data2="this.store.components.system"
         :index_list="component_types.PC"
@@ -50,9 +58,27 @@
         type="system"
         @duplicate="duplicateComponent"
         @toggleSelect="toggleSelect"
+        />
+        
+      <h3>Pantallas</h3>
+      <p>
+        Selecciona que tipo de pantallas has utilizado durante el proyecto.
+      </p>
+      <ComponentGroup
+        :data2="this.store.components.system"
+        :index_list="component_types.MO"
+        :system="true"
+        :selected="selected_components.system"
+        type="system"
+        @duplicate="duplicateComponent"
+        @toggleSelect="toggleSelect"
       />
 
       <h3>Servidores</h3>
+      <p>
+        Selecciona este componente si has utilizado algún servidor en un centro de datos o alguna plataforma de cloud.
+        Por ejemplo para alojar el proyecto durante o después de su desarrollo. 
+      </p>
       <ComponentGroup
         :data2="this.store.components.system"
         :index_list="component_types.SE"
@@ -63,7 +89,11 @@
         @toggleSelect="toggleSelect"
       />
 
-      <h3>Otros</h3>
+
+      <h3>Otros componentes</h3>
+      <p>
+        Algunos componentes que has podido utilizar. 
+      </p>
       <ComponentGroup
         :data2="this.store.components.system"
         :index_list="component_types.MO"
@@ -75,7 +105,9 @@
       />
 
       <h3>Tus componentes</h3>
-
+      <p>
+        Estos son los componentes que has editado o creado desde cero.
+      </p>
 
       <ComponentGroup
         :data2="this.store.components.user"
@@ -87,11 +119,19 @@
         @edit="editComponent"
         @delete="deleteComponent"
         @toggleSelect="toggleSelect"
+        @addNew="addNewComponent"
       />
+      
 
-      <el-button text @click="addNewComponent">
-        +
-      </el-button>
+      <div style="flex: 1; padding: 1.5em; display: flex; justify-content: flex-end; align-items: flex-end;">
+        <el-affix position="bottom" :offset="20">
+          <el-button v-if="state.add_use || state.add_calc" @click="CreateCalculation()">
+            Guardar usos
+          </el-button>
+        </el-affix>
+
+      </div>
+
 
       <el-dialog
         style="width: 35em;"
@@ -218,14 +258,39 @@ export default {
     closeModal() {
       this.dialogVisible = false;
     },
+    isAnyComponentSelected(){
+      console.log("type")
+      var types = ["system", "user"];
+      for(var type_index in types){
+        var type = types[type_index];
+        for (const index in this.selected_components[type]){
+          console.log(index)
+          if(this.selected_components[type][index])
+            return true;
+        }
+      }
+      return false;
+    },
     async CreateCalculation(){
+      if (!this.isAnyComponentSelected()){
+        ElMessage.error({
+          duration: 8000,
+          message: 'Selecciona algún componente antes de continuar',
+        })
+        return
+      }
       if (!this.state.add_use){
         await this.operations.saveCalculation(this.new_calculation);
         this.store.components_use = [];
       }
       this.createUses("system");
       this.createUses("user");
-      this.$router.push('/') 
+      this.$router.push('/');
+      ElMessage.success({
+          showClose: true,
+          duration: 12000,
+          message: 'Usos añadidos correctamente, ahora indica para cada uno el tiempo de uso o modifica las emisiones',
+        })
 
     },
     createUses(type){
@@ -285,9 +350,9 @@ export default {
       }
       else {
         ElMessage.error({
-            duration: 8000,
-            message: 'Has introducido valores invalidos',
-          })
+          duration: 8000,
+          message: 'Has introducido valores invalidos',
+        })
       }
     },
     prepareNewComponent(){

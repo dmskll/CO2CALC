@@ -21,9 +21,9 @@ import 'element-plus/dist/index.css'
 // library.add(icons_solid)
 
 import { library } from "@fortawesome/fontawesome-svg-core";
-import { faFileCirclePlus, faCircleInfo} from "@fortawesome/free-solid-svg-icons";
-import { faFolderOpen } from "@fortawesome/free-regular-svg-icons";
-library.add(faFolderOpen, faFileCirclePlus, faCircleInfo);
+import { faFileCirclePlus, faCalculator, faCircleInfo, faPlus, faPlusSquare, faMicrochip, faBolt} from "@fortawesome/free-solid-svg-icons";
+import { faFolderOpen, faFilePdf, faCircleQuestion} from "@fortawesome/free-regular-svg-icons";
+library.add(faFolderOpen, faBolt, faCircleQuestion, faCalculator, faFileCirclePlus, faCircleInfo, faPlusSquare, faPlus, faMicrochip, faFilePdf);
 // library.add(folderOpen);
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
