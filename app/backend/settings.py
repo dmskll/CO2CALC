@@ -24,12 +24,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-t8(zw6_(ds5-1mii3&9#mg1r6rp+wmwvzf+ggg20jtzbilkxb&'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     '0.0.0.0',
-    '127.0.0.1'
+    '127.0.0.1',
+    'dev.fib.upc.edu',
 ]
+# 'https://sso.pre.upc.edu',
+CSRF_TRUSTED_ORIGINS = ['https://dev.fib.upc.edu']
 
 
 # Application definition
@@ -41,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_cas_ng',
     'django_extensions',
     'components',
     'core',
@@ -57,7 +61,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django_cas_ng.middleware.CASMiddleware',
 ]
+
 
 ROOT_URLCONF = 'backend.urls'
 
@@ -134,6 +140,11 @@ STATIC_URL = 'static/'
 # ]
 
 
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'django_cas_ng.backends.CASBackend',
+)
+
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES':(
@@ -148,3 +159,9 @@ REST_FRAMEWORK = {
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CAS_FORCE_SSL_SERVICE_URL = True
+
+CAS_CREATE_USER = True
+
+CAS_SERVER_URL = 'https://sso.pre.upc.edu/CAS/'

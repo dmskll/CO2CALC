@@ -1,8 +1,8 @@
 <template>
-  <div id="element-to-print">  
+  <div id="result-element">  
   <div class="result-box">
     <h3>
-      La estimación de Co2 emitido para realizar el proyecto en un caso medio es de: 
+      La estimación de emisiones de Co2 asociada proyecto en un caso medio es de: 
       <h1>
         {{ total_results.middle.total }} KgCo2
       </h1>
@@ -14,23 +14,48 @@
     emisiones podrian llegar hasta {{ total_results.worst.total }} KgCo2. 
     
   </div>
+  <br>
+  <div class="result-box">
+    <h3>
+      El consumo electrico estimado es de: 
+      <h1>
+        {{ total_results.middle.use_cost }} kWh
+      </h1>
+    </h3>
+    Dependiendo de la intensidad del uso el consumo puede variar. En el mejor caso donde 
+    el uso de los componentes ha sido menos intensivo se estima un consumo de 
+    {{ total_results.best.use_cost }} kWh. En el peor de los casos se estima que el
+    consumo podria llegar hasta {{ total_results.worst.use_cost }} kWh. 
+    
+  </div>
   <div class="compare-box">
     <h3>
-      Algunas comparaciones... 
+      {{ total_results.middle.total }} KgCo2 equivalen a:
     </h3>
-    <ul>
-      <li>comida</li>
-      <li>coche</li>
-      <li>arbol</li>
-    </ul> 
-
     
+    <ul>
+      <li>{{  (total_results.middle.total / compare.beef).toFixed(0) }} hamburguesas de ternera</li>
+      <li>{{  (total_results.middle.total / compare.beyond).toFixed(0) }}  hamburguesas de imitación vegetal</li>
+      <br>
+      <li>{{ (total_results.middle.total / compare.train_km).toFixed(1) }} viajes Barcelona-Madrid en AVE por pasajero</li>
+      <li>{{  (total_results.middle.total / compare.plain_km).toFixed(1) }} viajes Barcelon-Madrid en avión por pasajero</li>
+    </ul> 
+    <p style="font-size: 0.4em;">
+      <ul>
+        <li>//https://css.umich.edu/publications/research-publications/beyond-meats-beyond-burger-life-cycle-assessment-detailed</li>
+        <li>https://www.ecologistasenaccion.org/134774/la-aviacion-tiene-los-dias-contados/</li>
+      </ul> 
+    </p>
+  </div>
   </div>
   <br><br>
   <el-backtop :right="100" :bottom="100" />
   <el-affix :offset="40" style="text-align: center;">
     <div class="panel">
-      <el-button type="primary" @click="Convert_HTML_To_PDF">PDF</el-button>
+      <el-button type="primary" @click="Convert_HTML_To_PDF">
+        Descargar
+        <font-awesome-icon style="margin-left: 0.5em;" icon="fa-regular fa-file-pdf" size="lg"/>
+      </el-button>
       <el-switch
       v-model="switch_latex"
       class="mt-2"
@@ -40,7 +65,7 @@
     </div>
   </el-affix>
   <br><br>
-  
+  <div id="table-print">
   <table class="resume">
     <caption style="caption-side:bottom">
     Resumen de las emisiones (KgCo2) de las fases de vida de los componentes para el caso bueno, medio y optimo.
@@ -254,6 +279,9 @@
 
 <!-- </div>
 <div > -->
+</div>
+
+<div id="equation-print" >
 <div v-for=" (use) in uses" :key="use.pk" style="margin-bottom: 50px; text-align: left; font-size: medium; break-before: page;">
   <div v-if="use.component.is_server"> 
       <h1>{{ use.component.name }} (Server)</h1>
@@ -479,15 +507,16 @@
 
 
 
+  </div>
+  </div>
+  </div>
 
-  </div>
-  </div>
-</div>
 
 </template>
 <!-- <script src="https://html2canvas.hertzen.com/dist/html2canvas.js"></script> -->
 <script>
 import { useComponentsData } from "@/stores/ComponentsData"
+import { PDFDocument } from 'pdf-lib';
 // import html2pdf from "html2pdf.js";
 import jsPDF from 'jspdf'
 import { font1 } from "@/MathJax/font-math_main"
@@ -546,6 +575,15 @@ export default {
       },
       font1: font1,
       font2: font2,
+      compare: { //kgCo2
+        beef: 3.7, //https://css.umich.edu/publications/research-publications/beyond-meats-beyond-burger-life-cycle-assessment-detailed
+        beyond: 0.4,
+        car_km: 70.3, //104 gco2
+        bus_km: 0.068, //68 gco2
+        train_km: 14.4, //14 gco2
+        plain_km: 114, //285 gco2 //https://www.ecologistasenaccion.org/134774/la-aviacion-tiene-los-dias-contados/
+
+      }
     }
   },
   methods: {
@@ -555,14 +593,85 @@ export default {
       doc.text("Hello World", 10, 10);
       doc.save(pdfName + '.pdf');
     },
-    Convert_HTML_To_PDF() {
+    // async  mergePdfs(pdfsToMerges) {
+    //   const mergedPdf = await PDFDocument.create();
+    //   const actions = pdfsToMerges.map(async pdfBuffer => {
+    //     const pdf = await PDFDocument.load(pdfBuffer);
+    //     const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+    //     copiedPages.forEach((page) => {
+    //       // console.log('page', page.getWidth(), page.getHeight());
+    //       // page.setWidth(210);
+    //       mergedPdf.addPage(page);
+    //     });
+    //   });
+    //   await Promise.all(actions);
+    //   const mergedPdfFile = await mergedPdf.save();
+    //   return mergedPdfFile;
+    // },
+    async Convert_HTML_To_PDF() {
 
-      var doc = new jsPDF();
+      var results = new jsPDF();
+      var table = new jsPDF();
+      var equations = new jsPDF();
+
 
       // Source HTMLElement or a string containing HTML.
-      var elementHTML = document.getElementById("element-to-print");
-      console.log(elementHTML)
+      var resultsHTML = document.getElementById("result-element");
+      var tableHTML = document.getElementById("table-print");
+      var equationHTML = document.getElementById("equation-print");
+
+      // Utiliza querySelectorAll para seleccionar todos los elementos div con la clase "miClase"
+      
+      // resultsHTML = resultsHTML.cloneNode(true);
+      
+      // var panel_div = resultsHTML.querySelector(".panel");
+
+      // // Itera a través de los elementos seleccionados y elimina cada uno
+      // if (panel_div) {
+      //   panel_div.remove();
+      // }
      
+      this.addFonts(results);
+      this.addFonts(table);
+      this.addFonts(equations);
+
+      results = this.htmlToPDF(results, resultsHTML);
+      table = this.htmlToPDF(table, tableHTML);
+      equations = this.htmlToPDF(equations, equationHTML);
+
+      this.merge([results, table, equations])
+    },
+    htmlToPDF(doc, html){
+      return doc.html(html, {
+                callback:  function(doc) {
+                    // Save the PDF
+                    // doc.save();
+                    return doc
+                
+                },
+                margin: [10, 10, 10, 10],
+                autoPaging: 'text',
+                x: 0,
+                y: 0,
+                width: 190, //target width in the PDF document
+                windowWidth: 675 //window w idth in CSS pixels
+            });
+    },
+    async merge(docs){
+      const pdfDoc =  await PDFDocument.create();
+      for (const index in docs){
+        var doc_array = await docs[index].output("arraybuffer")
+        const firstDoc =  await PDFDocument.load(doc_array); //arrayB from the last step of jspdf above.
+        const pages =  await  pdfDoc.copyPages(firstDoc, firstDoc.getPageIndices());
+        pages.forEach((page) => pdfDoc.addPage(page));
+      }
+
+      const pdfBytes =  await pdfDoc.save("file.pdf");
+      let file = new Blob([pdfBytes], { type: 'application/pdf' });
+      var fileURL = URL.createObjectURL(file);
+      window.open(fileURL);
+    },
+    addFonts(doc){
       doc.addFileToVFS('mathjax_mainregular-normal.ttf', this.font1);
       doc.addFileToVFS('nimbus.otf', this.font2);
 
@@ -575,8 +684,6 @@ export default {
 
       // doc.addFont('mathjax_mainregular-normal.ttf', 'KaTeX_Main-Bold', 'normal');
       // doc.addFont('mathjax_mainregular-normal.ttf', 'KaTeX_Main-Regular', 'normal');
-
-
       // doc.addFont('nimbus.otf', 'Liberation Serif Bold', 'bold');
       // doc.addFont('nimbus.otf', 'Liberation Serif', 'normal');
       
@@ -585,19 +692,6 @@ export default {
       doc.setFont("MathJax_Math-Italic");
       doc.setFont("MathJax_Main-Bold");
       doc.setFont("MathJax_Size1-Regular");
-
-      doc.html(elementHTML, {
-          callback: function(doc) {
-              // Save the PDF
-              doc.save('document-html.pdf');
-          },
-          margin: [10, 10, 10, 10],
-          autoPaging: 'text',
-          x: 0,
-          y: 0,
-          width: 190, //target width in the PDF document
-          windowWidth: 675 //window w idth in CSS pixels
-      });
     },
     savePDF() {
       // var opt = {
@@ -1059,6 +1153,7 @@ td {
 }
 
 .compare-box{
+  font-family: arial, sans-serif;
   border-radius: 15px;
   border: solid 4px;
   border-color: #7CD4AC;

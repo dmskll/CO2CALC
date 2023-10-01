@@ -123,12 +123,17 @@
       />
       
 
-      <div style="flex: 1; padding: 1.5em; display: flex; justify-content: flex-end; align-items: flex-end;">
-        <el-affix position="bottom" :offset="20">
-          <el-button v-if="state.add_use || state.add_calc" @click="CreateCalculation()">
-            Guardar usos
-          </el-button>
-        </el-affix>
+      <div style="flex: 1; padding: 1.5em; display: flex; justify-content: center;">
+        <!-- <el-affix position="bottom" :offset="20">
+
+        </el-affix> -->
+        <el-button 
+            v-if="state.add_use || state.add_calc" 
+            @click="CreateCalculation()" 
+            size="large"
+        >
+          Guardar usos
+        </el-button>
 
       </div>
 
@@ -231,7 +236,8 @@ export default {
       new_calculation: {
         name: "",
         emissions: this.store.mix[0].emissions,
-      }
+      },
+
     }
   },
   watch: {
@@ -272,6 +278,20 @@ export default {
       return false;
     },
     async CreateCalculation(){
+      if (this.state.add_calc && this.new_calculation.name == "" ){
+        ElMessage.error({
+          duration: 8000,
+          message: 'Escribe un nombre para el proyecto',
+        })
+        return
+      }
+      if (this.new_calculation.emissions == "" ){
+        ElMessage.error({
+          duration: 8000,
+          message: 'Indica el ratio de emisiones',
+        })
+        return
+      }
       if (!this.isAnyComponentSelected()){
         ElMessage.error({
           duration: 8000,
