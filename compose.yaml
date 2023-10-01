@@ -5,3 +5,5 @@ services:
       target: build
     ports: 
       - '8000:8000'
+    volumes:
+      - '../data/static/:/app/static/'

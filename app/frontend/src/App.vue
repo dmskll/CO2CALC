@@ -7,15 +7,6 @@
       <div :span="18" :offset="3">
         <div class="content" v-if="loaded==2">
   
-  
-          <!-- <router-view
-            :calculation_data="calculation_data"
-            :calculations_data="calculation"
-            :components="components"
-            @addComponent="addComponentUse"
-            @updateCalculation="updateCalculationData"
-            @updateComponents="updateComponentsData"
-          /> -->
           <router-view
             v-if="this.$route.name === 'Components'"
           />
@@ -29,7 +20,7 @@
           />
   
           <router-view
-            v-if="this.$route.name === 'Home'"
+            v-if="this.$route.name === 'Calculator'"
             @updateCalculation="updateCalculationData"
             @changeCalculation="changeCalculation"
   

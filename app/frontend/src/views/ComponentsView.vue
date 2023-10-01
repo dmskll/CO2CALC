@@ -161,8 +161,8 @@
 </template>
 
 <script>
-  // import ComponentData from "@/components/ComponentData.vue"
-  // import ComponentGroup from "@/components/ComponentGroup.vue"
+  // import ComponentData from "@/components/calculator/ComponentData.vue"
+  // import ComponentGroup from "@/components/calculator/ComponentGroup.vue"
   import LoadingC from "@/components/loadingC.vue"
 
   import { axios } from "@/common/api.service.js"
@@ -177,7 +177,7 @@
 
 const ComponentData = defineAsyncComponent({
   // the loader function
-  loader: () => import('@/components/ComponentData.vue'),
+  loader: () => import('@/components/calculator/ComponentData.vue'),
 
   // A component to use while the async component is loading
   loadingComponent: LoadingC,
@@ -192,7 +192,7 @@ const ComponentData = defineAsyncComponent({
 })
 
 const ComponentGroup = defineAsyncComponent({
-  loader: () => import('@/components/ComponentGroup.vue'),
+  loader: () => import('@/components/calculator/ComponentGroup.vue'),
   loadingComponent: LoadingC,
   delay: 0,
   timeout: 3000

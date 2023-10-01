@@ -10,7 +10,6 @@ class IndexTemplateView(TemplateView):
 class CurrentUserView(APIView):
     def get(self, request):
         user = request.user
-        print("!!!!!!!!")
         print(user.username)
         if user.is_authenticated:
             return Response({

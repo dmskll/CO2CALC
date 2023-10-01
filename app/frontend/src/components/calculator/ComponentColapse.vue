@@ -31,8 +31,8 @@
   
 
 <script>
-import ComponentInfo from "@/components/ComponentInfo.vue"
-import ComponentUsage from "@/components/ComponentUsage.vue"
+import ComponentInfo from "@/components/calculator/ComponentInfo.vue"
+import ComponentUsage from "@/components/calculator/ComponentUsage.vue"
 import { axios } from "@/common/api.service.js"
 
   export default {

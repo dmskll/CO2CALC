@@ -77,7 +77,7 @@ import { defineAsyncComponent } from 'vue'
 
 const ComponentData = defineAsyncComponent({
   // the loader function
-  loader: () => import('@/components/ComponentData.vue'),
+  loader: () => import('@/components/calculator/ComponentData.vue'),
 
   // A component to use while the async component is loading
   // loadingComponent: LoadingComponent,
@@ -93,8 +93,8 @@ const ComponentData = defineAsyncComponent({
 
 
 // const ComponentData = defineAsyncComponent(() => ({
-//   loader: () => import('@/components/ComponentData.vue'),
-//   // component: import("@/components/ComponentData.vue"),
+//   loader: () => import('@/components/calculator/ComponentData.vue'),
+//   // component: import("@/components/calculator/ComponentData.vue"),
 //   // loading: LoadingComponent,
 //   // error: ErrorComponent,
 //   // The error component will be displayed if a timeout is
@@ -102,7 +102,7 @@ const ComponentData = defineAsyncComponent({
 //   timeout: 3000
 // }))
 
-// import ComponentData from "@/components/ComponentData.vue"
+// import ComponentData from "@/components/calculator/ComponentData.vue"
   export default {
     name: "ComponentGroup",
     components: {

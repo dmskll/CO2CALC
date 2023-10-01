@@ -15,21 +15,11 @@ RUN apk add --no-cache bash\
     && rm -rf /var/cache/apk/*
 RUN pip3 install -r requirements.txt --no-cache-dir
 COPY . /app
-ENTRYPOINT ["python3"] 
-CMD ["manage.py", "runserver", "0.0.0.0:8000"]
 
-
-EXPOSE 8080
 RUN apk add --no-cache npm
 WORKDIR /app/frontend
-#COPY package*.json .
 RUN npm install
-#COPY . .
-RUN npm run build
-#CMD ["npm", "run", "serve"]
-
-#ENTRYPOINT ["python3"] 
-#CMD ["manage.py", "runserver", "0.0.0.0:8000"]
+# RUN npm run build
 
 
 RUN <<EOF
@@ -39,4 +29,6 @@ EOF
 # install Docker tools (cli, buildx, compose)
 COPY --from=gloursdocker/docker / /
 WORKDIR /app 
-CMD ["manage.py", "runserver", "0.0.0.0:8000"]
+CMD cd frontend && npm run build && cd /app && rm -rf /app/frontend && python manage.py collectstatic --noinput && gunicorn --bind 0.0.0.0:8000 backend.wsgi
+
+# CMD ["manage.py", "runserver", "0.0.0.0:8000"]
