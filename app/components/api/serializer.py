@@ -18,9 +18,6 @@ class ComponentSerializer(serializers.ModelSerializer):
     middle_case = serializers.DecimalField(
         max_digits=7, decimal_places=2, coerce_to_string=False
     )
-    cfp = serializers.DecimalField(
-        max_digits=7, decimal_places=2, coerce_to_string=False
-    )
     cfp_build_phase = serializers.DecimalField(
         max_digits=7, decimal_places=2, coerce_to_string=False
     )

@@ -109,7 +109,10 @@
         </template>
       </el-popover>
       </el-form-item>
-      <el-checkbox v-if="dialog" v-model="local_data.is_server" label="servidor" size="large" />
+      <div v-if="dialog" style="margin-left: auto; margin-right: auto;">
+        <el-checkbox  v-model="local_data.is_server" label="servidor" size="large" />
+
+      </div>
     </el-form>
 
   </div>
@@ -255,12 +258,12 @@
 </el-collapse-item>
     </el-collapse>
 
-  <span class="dialog-footer" v-if="dialog">
-    <el-button @click="$emit('close')">Cancel</el-button>
-    <el-button type="primary" @click="$emit('save', local_data)">
-      Confirm
+  <div  class="dialog-footer" v-if="dialog">
+    <el-button @click="$emit('close')" plain>Cancelar</el-button>
+    <el-button color="#7cd4ac" @click="$emit('save', local_data)" plain>
+      Guardar
     </el-button>
-  </span>
+  </div>
 </template>
   
 
@@ -341,6 +344,10 @@ import { useComponentsData } from "@/stores/ComponentsData"
 
 
 <style>
+
+el-popover{
+  font-family: "Times New Roman", Times, serif!;
+}
 .code-container{
   display: flex;
   flex-direction: row;

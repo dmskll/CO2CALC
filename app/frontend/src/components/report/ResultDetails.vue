@@ -9,7 +9,7 @@
     "
   >
     <div v-if="use.component.is_server">
-      <h1>{{ use.component.name }} (Server)</h1>
+      <h1>{{ use.component.name }}</h1>
 
       <table class="component-table">
         <tbody>
@@ -19,11 +19,11 @@
             <td colspan="3">Casos de uso (W)<br /></td>
             <td>Tiempo de uso<br /></td>
             <td>Aplicaciones alojadas<br /></td>
-            <td>mix eléctrico<br /></td>
+            <td>Mix eléctrico<br /></td>
           </tr>
           <tr>
             <td rowspan="2">{{ use.component.description }}</td>
-            <td class="sub-header">emisiones</td>
+            <td class="sub-header">Emisiones</td>
             <td class="sub-header">Desviacón</td>
             <td class="sub-header">bueno</td>
             <td class="sub-header">medio</td>
@@ -43,7 +43,7 @@
       </table>
       <p style="text-align: justify">
         El coste de fabricación viene calculado por el coste de producción del
-        server dividido por el numero de aplicaciones que podria alojar sin que
+        servidor dividido por el número de aplicaciones que podría alojar sin que
         el rendimiento se viera excesivamente afectado.
       </p>
 
@@ -60,11 +60,11 @@
       <p style="text-align: justify">
         El coste de uso viene dado por dos partes según el consumo del servidor,
         teniendo en cuenta los gastos que equivalen que el servidor esté alojado
-        en un CPD. El directo (50%) es el consumo electrico de la maquina (47%)
+        en un CPD. El directo (50%) es el consumo eléctrico de la máquina (47%)
         más la red (3%), el coste indirecto (50%) es el que representa el
         sobreconsumo que tiene el servidor en el centro de datos (costes de
-        refrigeración (37%), distribución de la energia (10%), iluminación (3%)
-        y distribución de la energia (10%)).
+        refrigeración (37%), distribución de la energía (10%), iluminación (3%)
+        y distribución de la energía (10%)).
         <br /><br />
         De esta forma primero calcularemos el coste directo del consumo de la
         aplicación en el servidor y lo multiplicaremos por dos para tener en
@@ -154,8 +154,8 @@
         </div>
 
         <p style="text-align: justify">
-          Estos son los calculos para el mejor caso, en el que el consumo de
-          electricidad y el coste de fabricación ha más bajo.
+          Estos son los cálculos para el mejor caso, en el que el consumo de
+          electricidad y el coste de fabricación ha sido más bajo.
         </p>
 
         <div class="equations-box">
@@ -193,14 +193,14 @@
         <tbody>
           <tr>
             <td style="width: 80%">Descripción</td>
-            <td colspan="2">Fabricación (kgCo2)</td>
+            <td colspan="2">Fabricación (kgCO2)</td>
             <td colspan="3">Casos de uso (W)<br /></td>
             <td>Tiempo de uso<br /></td>
-            <td>mix eléctrico<br /></td>
+            <td>Mix eléctrico<br /></td>
           </tr>
           <tr>
             <td rowspan="2">{{ use.component.description }}</td>
-            <td class="sub-header">emisiones</td>
+            <td class="sub-header">Emisiones</td>
             <td class="sub-header">Desviacón</td>
             <td class="sub-header">bueno</td>
             <td class="sub-header">medio</td>
@@ -235,8 +235,8 @@
 
       <p style="text-align: justify">
         Para medir el impacto que tiene el tiempo de uso se ha multiplicado el
-        consumo electrico por el tiempo de uso dedicado al proyecto,
-        conviertiendolo posteriormente en kilos de CO2.
+        consumo eléctrico por el tiempo de uso dedicado al proyecto,
+        convirtiéndolo posteriormente en kilos de CO2.
       </p>
 
       <div class="equations-box">
@@ -248,8 +248,8 @@
       </div>
 
       <p style="text-align: justify">
-        Para el coste de destrucción se ha tenido obtenido el porcentaje
-        equivalente a partir del datasheet del fabricante.
+        Asumimos que el coste de destrucción es un 1% del coste de las fases
+        de fabricación y uso.
       </p>
       <div class="equations-box">
         <EquationComponent :show_tex="latex" :formula="end_life_exp" />
@@ -274,7 +274,7 @@
 
       <div style="break-before: page">
         <p style="text-align: justify">
-          Estos son los calculos para el peor caso, en el que el consumo de
+          Estos son los cálculos para el peor caso, en el que el consumo de
           electricidad y el coste de fabricación ha sido más elevado
         </p>
 
@@ -298,8 +298,8 @@
         </div>
 
         <p style="text-align: justify">
-          Estos son los calculos para el mejor caso, en el que el consumo de
-          electricidad y el coste de fabricación ha más bajo.
+          Estos son los cálculos para el mejor caso, en el que el consumo de
+          electricidad y el coste de fabricación ha sido más bajo.
         </p>
 
         <div class="equations-box">
@@ -338,15 +338,15 @@ export default {
   return{
     formula: '$$x = {-b \\pm \\sqrt{b^2-4ac} \\over 2a}.$$',
     use_percentaje_exp: "\\textbf{Porcentaje de uso} = \\frac{\\text{horas de desarrollo}}{\\text{horas útiles}}\\cdot 100",
-    build_cost_exp: "\\textbf{Coste fabricacion en el proyecto}=\\text{coste fabricación}\\cdot \\text{porcentaje de uso}",
+    build_cost_exp: "\\textbf{Coste fabricación en el proyecto}=\\text{coste fabricación}\\cdot \\text{porcentaje de uso}",
     use_cost_exp: "\\textbf{Coste de uso}= \\text{consumo} \\cdot  \\text{horas de uso}",
     server_hours_exp: "\\textbf{Total de horas} = 24 \\cdot 365 \\cdot 6 = \\text{52560 horas}",
-    build_cost_server_exp: "\\textbf{Coste de fabricacion} = \\frac{\\text{emisiones de CO2}}{\\text{aplicaicones alojadas}}",
+    build_cost_server_exp: "\\textbf{Coste de fabricación} = \\frac{\\text{emisiones de CO2}}{\\text{aplicaicones alojadas}}\\cdot \\frac{\\text{Años de uso}}{\\text{Años utiles}}",
     consume_server_exp: "\\textbf{Consumo servidor} = \\frac{\\text{consumo} \\cdot \\text{total de horas}}{\\text{aplicaicones alojadas}}",
     consume_network_server: "\\textbf{Consumo red} = \\frac{\\text{Consumo servidor}}{47} \\cdot 3",
     use_cost_server_exp: "\\textbf{Coste de uso} = (\\text{Consumo servidor} + \\text{Consumo red}) \\cdot 2",
-    end_life_exp: "\\textbf{Coste destrucción}= (\\text{Coste fabricacion en el proyecto} +  \\text{Coste de uso})\\cdot 0.01",
-    total_cost_exp: "\\textbf{Coste total} = \\text{Coste de fabricacion} + \\text{Coste de uso} + \\text{Coste de destruccion}",
+    end_life_exp: "\\textbf{Coste destrucción}= (\\text{Coste fabricación en el proyecto} +  \\text{Coste de uso})\\cdot 0.01",
+    total_cost_exp: "\\textbf{Coste total} = \\text{Coste de fabricación} + \\text{Coste de uso} + \\text{Coste de destrucción}",
     server_hours: {
       string: "24*365*6",
       number: 24*365*6
@@ -403,7 +403,7 @@ export default {
         name = " (mejor caso)"
         break;
     }
-    var equation = "\\textbf{Coste fabricacion en el proyecto "+ name +"}=\\text{"+ cfp_build_phase +"KgCo2}\\cdot \\text{"+ use_percent +"} = "+ build_cost + "KgCo2";
+    var equation = "\\textbf{Coste fabricación en el proyecto "+ name +"}=\\text{"+ cfp_build_phase +"KgCo2}\\cdot \\text{"+ use_percent +"} = "+ build_cost + "KgCo2";
     return equation;
   },
   build_cost_server(use, case_type) {
@@ -411,6 +411,7 @@ export default {
     var build_cost = use[case_type].build_cost;
     var cfp_build_phase = use.component.cfp_build_phase;
     var app = use.component.hosted_apps;
+    var years = use.server_years;
 
     switch (case_type) {
       case 'middle':
@@ -423,7 +424,7 @@ export default {
         name = " (mejor caso)"
         break;
     }
-    var equation =  "\\textbf{Coste fabricacion en el proyecto "+ name +"}=\\frac{\\text{"+cfp_build_phase+"KgCo2}}{"+app+"} = " +build_cost+"KgCo2";
+    var equation =  "\\textbf{Coste fabricación en el proyecto "+ name +"}=\\frac{\\text{"+cfp_build_phase+"KgCo2}}{"+app+"}\\cdot \\frac{\\text{6 años}}{\\text{"+years+" años}} = " +build_cost+"KgCo2";
     return equation;
   },
   destruction_cost(use, case_type) {

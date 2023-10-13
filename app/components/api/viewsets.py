@@ -20,6 +20,16 @@ from .serializer import (
 
 @swagger_auto_schema(methods=["get"])
 class ComponentDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    get:
+    Retorna el componente indicado por la id de la petición.
+
+    put:
+    Modifica el componente indicado por la id de la petición.
+
+    delete:
+    Elimina el componente indicado por la id de la petición.
+    """
     queryset = Component.objects.all()
     serializer_class = ComponentSerializer
     permission_classes = [ComponentIsOwner]
@@ -29,23 +39,23 @@ class ComponentDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
         return super().patch(request, *args, **kwargs)
 
 
+# @method_decorator(
+#     name="get",
+#     decorator=swagger_auto_schema(
+#         responses={
+#             200: ComponentSerializer,
+#             201: "buenas",
+#         }
+#     ),
+# )
 @swagger_auto_schema(methods=["get"])
-@method_decorator(
-    name="get",
-    decorator=swagger_auto_schema(
-        responses={
-            200: ComponentSerializer,
-            201: "buenas",
-        }
-    ),
-)
 class ComponentListCreateAPIView(generics.ListCreateAPIView):
     """
     get:
-    Return a list of all the existing users.
+    Retorna los componentes creados por el usuario.
 
     post:
-    Create a new user instance.
+    Crea un nuevo componente.
     """
 
     serializer_class = ComponentSerializer
@@ -59,7 +69,7 @@ class ComponentListCreateAPIView(generics.ListCreateAPIView):
 
         serializer.save(owner=owner, system_component=system, type=type)
 
-    @swagger_auto_schema(responses={200: "buenas"})
+    # @swagger_auto_schema(responses={200: "buenas"})
     def get_queryset(self):
         if self.request.user.is_authenticated:
             return Component.objects.filter(owner=self.request.user)
@@ -69,19 +79,36 @@ class ComponentListCreateAPIView(generics.ListCreateAPIView):
 
 @swagger_auto_schema(methods=["get"])
 class SystemComponentListAPIView(generics.ListAPIView):
+    """
+    get:
+    Retorna los componentes de sistema, públicos para todos los usuarios.
+
+    post:
+    Crea un nuevo componente de sistema, únicamente para admin.
+    """    
     queryset = Component.objects.filter(system_component=True)
     serializer_class = ComponentSerializer
     permission_classes = [IsAdminUserOrReadOnly]
 
 
 class ComponentUsageDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    get:
+    Retorna el uso indicado por la id de la petición.
+
+    put:
+    Modifica el uso indicado por la id de la petición.
+
+    delete:
+    Elimina el uso indicado por la id de la petición.
+    """
     queryset = ComponentUsage.objects.all()
     serializer_class = ComponentUsageSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     # Component usage no tiene el atributo de owner, por eso se comprueba accediendo al owner
     # del calculo al que pertenece.
-    @swagger_auto_schema(responses={200: "buenas"})
+    # @swagger_auto_schema(responses={200: "buenas"})
     def get_queryset(self):
         if self.request.user.is_authenticated:
             usage_pk = self.kwargs.get("pk")
@@ -109,6 +136,13 @@ class ComponentUsageDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class ComponentUsageListCreateAPIView(generics.ListCreateAPIView):
+    """
+    get:
+    Retorna los usos que pertenecen al usuario de un cálculo en concreto.
+
+    post:
+    Crea un nuevo uso en un cálculo en concreto.
+    """    
     queryset = ComponentUsage.objects.all()
     serializer_class = ComponentUsageSerializer
     # permission_classes = [IsOwner]

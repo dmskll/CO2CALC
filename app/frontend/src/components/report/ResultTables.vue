@@ -1,8 +1,8 @@
 <template>
   <table class="resume">
     <caption style="caption-side: bottom">
-      Resumen de las emisiones (KgCo2) de las fases de vida de los componentes
-      para el caso bueno, medio y optimo.
+      Resumen de las emisiones (KgCO2) de las fases de vida de los componentes
+      para el caso bueno, medio y óptimo.
     </caption>
     <thead>
       <tr>
@@ -51,7 +51,7 @@
       </tr>
 
       <tr class="total">
-        <td>Total (KgCo2)</td>
+        <td>Total (KgCO2)</td>
         <td>{{ results.best.build_cost }}<br /></td>
         <td>{{ results.middle.build_cost }}</td>
         <td>{{ results.worst.build_cost }}</td>
@@ -70,13 +70,13 @@
 
   <table class="resume">
     <caption style="caption-side: bottom">
-      Resumen del consumo electrico (kWh) durante el uso de los componentes para
-      el caso bueno, medio y pesimo.
+      Resumen del consumo eléctrico (kWh) durante el uso de los componentes para
+      el caso bueno, medio y pésimo.
     </caption>
     <thead>
       <tr>
         <th rowspan="2">Componente</th>
-        <th colspan="3">Consumo electrico fase uso</th>
+        <th colspan="3">Consumo eléctrico fase uso</th>
       </tr>
 
       <tr>
@@ -107,7 +107,7 @@
 
 export default {
   name: "ResultTables",
-  props: ["results"],
+  props: ["results", "uses"],
 }
 </script>
 

@@ -17,6 +17,14 @@ https://v4.webpack.js.org/configuration/dev-server/
 https://github.com/webpack/webpack-dev-server/blob/master/migration-v4.md
 */
 
+
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+
+const AutoImport = require('unplugin-auto-import/webpack')
+const Components = require('unplugin-vue-components/webpack')
+const { ElementPlusResolver } = require('unplugin-vue-components/resolvers')
+
+
 module.exports = {
   // modules: {
   //   rules: [
@@ -31,6 +39,7 @@ module.exports = {
   //     }
   //   ]
   // },
+
   publicPath:
     process.env.NODE_ENV === "production"
       ? "/static/dist/"
@@ -51,4 +60,20 @@ module.exports = {
     hot: "only",
     headers: { "Access-Control-Allow-Origin": "*" },
   },
+  configureWebpack: {
+    plugins: [
+      new BundleAnalyzerPlugin(),
+      AutoImport({
+        resolvers: [ElementPlusResolver()],
+      }),
+      Components({
+        resolvers: [ElementPlusResolver()],
+      }),
+    ],
+    optimization: {
+      splitChunks: {
+        chunks: 'all'
+      }
+    } 
+  }
 };

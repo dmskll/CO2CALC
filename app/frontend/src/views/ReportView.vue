@@ -10,7 +10,7 @@
     style="text-align: center; margin-bottom: 4em; margin-top: 4em"
   >
     <div class="panel">
-      <el-button type="primary" @click="Convert_HTML_To_PDF">
+      <el-button type="primary" @click="exportToPDF">
         Descargar
         <font-awesome-icon
           style="margin-left: 0.5em"
@@ -26,7 +26,7 @@
   </el-affix>
 
   <div id="table-print">
-    <ResultTables :results="results" />
+    <ResultTables :results="results" :uses="uses"/>
   </div>
 
   <div id="equation-print">
@@ -36,8 +36,8 @@
 
 <script>
 import { useComponentsData } from "@/stores/ComponentsData"
-import { PDFDocument } from 'pdf-lib';
-import jsPDF from 'jspdf'
+// import { PDFDocument } from 'pdf-lib';
+// import jsPDF from 'jspdf'
 import { font1 } from "@/MathJax/font-math_main"
 import { font2 } from "@/MathJax/font-nimbussans"
 
@@ -95,9 +95,20 @@ export default {
   },
   methods: {
 
+    
+    
+    exportToPDF() {
+      import("jspdf").then(({ jsPDF }) => {
+        import("pdf-lib").then(({ PDFDocument }) => {
+          this.Convert_HTML_To_PDF(jsPDF, PDFDocument)
+        }).catch(error => console.log(error));
+      }).catch(error => console.log(error));
+    },
 
-    async Convert_HTML_To_PDF() {
+    async Convert_HTML_To_PDF(jsPDF, PDFDocument) {
 
+
+      
       var results = new jsPDF();
       var table = new jsPDF();
       var equations = new jsPDF();
@@ -115,7 +126,7 @@ export default {
       table = this.htmlToPDF(table, tableHTML);
       equations = this.htmlToPDF(equations, equationHTML);
 
-      this.merge([results, table, equations])
+      this.merge([results, table, equations], PDFDocument)
     },
     htmlToPDF(doc, html){
       return doc.html(html, {
@@ -133,7 +144,7 @@ export default {
                 windowWidth: 675 //window w idth in CSS pixels
             });
     },
-    async merge(docs){
+    async merge(docs, PDFDocument){
       const pdfDoc =  await PDFDocument.create();
       for (const index in docs){
         var doc_array = await docs[index].output("arraybuffer")
@@ -208,7 +219,7 @@ export default {
         for (const key in cases){
           use[key] = {};
           if (component.is_server)
-            this.serverCalculations(use[key], component, key, use.emissions);
+            this.serverCalculations(use[key], component, key, use.server_years, use.emissions);
           else
             this.normalCalculations(use[key], component, key, use.hours, use.emissions);
         }
@@ -242,12 +253,14 @@ export default {
           return -1;
       }
     },
-    serverCalculations(use, component, key, emissions){
+    serverCalculations(use, component, key, years, emissions){
 
       const power = this.powerByCase(key, component);
+      const deviation = component.cfp_deviation_standard * this.deviationByCase(key)
 
-      use["build_cost"] = this.round(component.cfp_build_phase / 12);
-      use["server_cost"] = this.round(((power/1000) * this.server_hours.number) / component.hosted_apps);
+      use["build_cost"] = this.round(((component.cfp_build_phase + deviation)/ component.hosted_apps) * (years / 6));
+       //multiplicamos los años por als horas teniendo en cuenta los años bisiestos
+      use["server_cost"] = this.round(((power/1000) * years * 8766) / component.hosted_apps);
       use["network_cost"] = this.round((use["server_cost"] / 47) * 3);
       use["direct_cost"] = use["server_cost"] + use["network_cost"];
       use["use_cost"] = this.round(use["direct_cost"] * 2);

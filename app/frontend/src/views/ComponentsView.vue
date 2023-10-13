@@ -47,9 +47,13 @@
     <div style="text-align: left;">
       
       <h3>Ordenadores</h3>
-      <p>
+      <p v-if="state.add_use || state.add_calc">
         Selecciona que tipo de ordenador has utilizado para realizar el proyecto. 
       </p>
+      <p v-else>
+        Ordenadores portátiles y de sobremesa con diferentes especificaciones.
+      </p>
+
       <ComponentGroup
         :data2="this.store.components.system"
         :index_list="component_types.PC"
@@ -61,8 +65,11 @@
         />
         
       <h3>Pantallas</h3>
-      <p>
+      <p v-if="state.add_use || state.add_calc">
         Selecciona que tipo de pantallas has utilizado durante el proyecto.
+      </p>
+      <p v-else>
+        Pantallas para ordenadores.
       </p>
       <ComponentGroup
         :data2="this.store.components.system"
@@ -75,10 +82,14 @@
       />
 
       <h3>Servidores</h3>
-      <p>
+    
+      <p v-if="state.add_use || state.add_calc">
         Selecciona este componente si has utilizado algún servidor en un centro de datos o alguna plataforma de cloud.
         Por ejemplo para alojar el proyecto durante o después de su desarrollo. 
       </p>
+      <p v-else>
+        Servidor situado en un centro de datos.
+      </p>        
       <ComponentGroup
         :data2="this.store.components.system"
         :index_list="component_types.SE"
@@ -96,7 +107,7 @@
       </p>
       <ComponentGroup
         :data2="this.store.components.system"
-        :index_list="component_types.MO"
+        :index_list="component_types.EX"
         :system="true"
         :selected="selected_components.system"
         type="system"
@@ -143,7 +154,7 @@
         v-model="dialogVisible" 
         :show-close="false" 
         :close-on-click-modal="false" 
-        title="Create Component"
+        title=""
       >
         
         <ComponentData 
@@ -228,6 +239,7 @@ export default {
         "PC": [],
         "SE": [],
         "MO": [],
+        "EX": [],
       },
       selected_components: {
         user: [],
@@ -237,7 +249,6 @@ export default {
         name: "",
         emissions: this.store.mix[0].emissions,
       },
-
     }
   },
   watch: {

@@ -97,7 +97,7 @@
       </el-button>
       <br />
       <div style="text-align: right">
-        <el-button @click="generateReport" plain>
+        <el-button color="#7cd4ac" @click="generateReport" plain>
           CALCULAR
           <font-awesome-icon
             style="margin-left: 0.6em"
@@ -183,17 +183,17 @@
           </div>
         </div>
       </el-scrollbar>
-      <span class="dialog-footer">
-        <el-button @click="dialogComponentVisible = false">Cancel</el-button>
-        <el-button type="primary" @click="dialogComponentVisible = false">
-          Confirm
+      <div  class="dialog-footer">
+        <el-button @click="dialogComponentVisible = false" plain>Cancelar</el-button>
+        <el-button color="#7cd4ac" @click="dialogComponentVisible = false" plain>
+          Guardar
         </el-button>
-      </span>
+      </div>
     </el-dialog>
 
     <el-dialog
       v-model="dialogCalculationVisible"
-      title="Add Calculation"
+      title=""
       width="600px"
     >
       <el-form :model="dialog_calculation" style="max-width: 300px">
@@ -205,10 +205,10 @@
           style="margin-top: 10px"
         />
       </el-form>
-      <span class="dialog-footer">
-        <el-button @click="dialogCalculationVisible = false">Cancel</el-button>
-        <el-button type="primary" @click="saveCalculation"> Confirm </el-button>
-      </span>
+      <div class="dialog-footer">
+        <el-button @click="dialogCalculationVisible = false" plain>Cancelar</el-button>
+        <el-button type="primary" color="#7cd4ac" @click="saveCalculation" plain> Guardar </el-button>
+      </div>
     </el-dialog>
 
     <el-dialog
@@ -216,7 +216,7 @@
       style="width: 35em"
       :show-close="false"
       :close-on-click-modal="false"
-      title="Create Component"
+      title=""
     >
       <el-alert
         v-if="this.dialog_component.component.id"

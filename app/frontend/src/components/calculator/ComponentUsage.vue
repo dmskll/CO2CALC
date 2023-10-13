@@ -13,13 +13,11 @@
     <span class="demonstration">Porcentaje de uso</span>
     <el-slider :disabled="!dialog" v-model="local_data.use" :step="10" show-stops />
   </div>          
-  <div v-if="dialog">
-    <span class="dialog-footer">
-      <el-button @click="$emit('close')">Cancel</el-button>
-      <el-button type="primary" @click="$emit('save', local_data)">
-        Confirm
-      </el-button>
-    </span>
+    <div  class="dialog-footer" v-if="dialog" style="text-align: right;">
+    <el-button @click="$emit('close')" plain>Cancelar</el-button>
+    <el-button color="#7cd4ac" @click="$emit('save', local_data)" plain>
+      Guardar
+    </el-button>
   </div>
 </template>
   

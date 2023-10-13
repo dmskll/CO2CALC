@@ -1,33 +1,33 @@
 <template>
   <div class="result-box">
     <h3>
-      La estimación de emisiones de Co2 asociada proyecto es de: 
+      La estimación de emisiones de CO2 asociada al proyecto es de:
       <h1>
         {{ results.middle.total }} KgCo2
       </h1>
     </h3>
-    Dependiendo de la intensidad del uso y de como se ha fabricado cada componente
-    las emisiones pueden variar. En el mejor caso donde se ha emitido lo menos posible 
-    y el uso de los componentes ha sido menos intensivo se estima una emisón de 
-    {{ results.best.total }} KgCo2. En el peor de los casos se estima que las
-    emisiones podrian llegar hasta {{ results.worst.total }} KgCo2. 
+    Dependiendo de la intensidad del uso y de como se ha fabricado cada componente, 
+    las emisiones pueden variar. En el mejor caso, donde se ha emitido lo menos 
+    posible y el uso de los componentes ha sido menos intensivo, se estima una 
+    emisión de {{ results.best.total }} KgCo2. En el peor de los casos se estima que las emisiones 
+    podrían llegar hasta {{ results.worst.total }} KgCo2.
   </div>
   <br>
   <div class="result-box">
     <h3>
-      El consumo electrico estimado es de: 
+      El consumo eléctrico estimado es de:
       <h1>
         {{ results.middle.use_cost }} kWh
       </h1>
     </h3>
-    Dependiendo de la intensidad del uso el consumo puede variar. En el mejor caso donde 
-    el uso de los componentes ha sido menos intensivo se estima un consumo de 
+    Dependiendo de la intensidad del uso, el consumo puede variar. En el mejor caso, donde
+    el uso de los componentes ha sido menos intensivo, se estima un consumo de
     {{ results.best.use_cost }} kWh. En el peor de los casos se estima que el
-    consumo podria llegar hasta {{ results.worst.use_cost }} kWh. 
+    consumo podría llegar hasta {{ results.worst.use_cost }} kWh.
   </div>
   <div class="compare-box">
     <h3>
-      {{ results.middle.total }} KgCo2 equivalen a:
+      {{ results.middle.total }} KgCO2 equivalen a:
     </h3>
     
     <ul>
@@ -35,7 +35,7 @@
       <li>{{  (results.middle.total / compare.beyond).toFixed(0) }}  hamburguesas de imitación vegetal</li>
       <br>
       <li>{{ (results.middle.total / compare.train_km).toFixed(1) }} viajes Barcelona-Madrid en AVE por pasajero</li>
-      <li>{{  (results.middle.total / compare.plain_km).toFixed(1) }} viajes Barcelon-Madrid en avión por pasajero</li>
+      <li>{{  (results.middle.total / compare.plain_km).toFixed(1) }} viajes Barcelona-Madrid en avión por pasajero</li>
     </ul> 
     <p style="font-size: 0.4em;">
       <ul>

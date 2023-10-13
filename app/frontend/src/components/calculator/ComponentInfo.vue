@@ -57,12 +57,12 @@
                   <el-input-number v-model="local_data.good_case_max_power" :precision="2" :step="0.1" :max="1000" :controls="false" />
           </el-form-item>
 </el-form>
-  <span class="dialog-footer" v-if="dialog">
-    <el-button @click="$emit('close')">Cancel</el-button>
-    <el-button type="primary" @click="$emit('save', local_data)">
-      Confirm
+  <div  class="dialog-footer" v-if="dialog">
+    <el-button @click="$emit('close')" plain>Cancelar</el-button>
+    <el-button color="#7cd4ac" @click="$emit('save', local_data)" plain>
+      Guardar
     </el-button>
-  </span>
+  </div>
 </template>
   
 

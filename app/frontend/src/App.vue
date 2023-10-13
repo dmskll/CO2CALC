@@ -217,6 +217,16 @@ body, html {
   border-color: rgb(189, 189, 189);
 }
 
+.el-dropdown-menu{
+  font-family: Nimbus Sans  !important; 
+}
+.el-popover{
+  font-family: Nimbus Sans  !important; 
+}
+
+.dialog-footer{
+  text-align: right;
+}
 
 .demo-radius .radius {
   height: 40px;

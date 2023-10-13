@@ -2,9 +2,9 @@
 
 FROM --platform=$BUILDPLATFORM python:3.8-alpine AS build
 EXPOSE 8000
-WORKDIR /app 
-COPY requirements.txt /app
-
+# Copiamos el directorio con los dos proyectos al contenedor
+COPY . /app
+# Instalamos paquetes necesarios
 RUN apk update && apk upgrade
 RUN apk add --no-cache bash\
                        pkgconfig \
@@ -13,14 +13,23 @@ RUN apk add --no-cache bash\
                        libcurl \
                        libc-dev \
     && rm -rf /var/cache/apk/*
+# Instalamos las dependencias del proyecto de python
+WORKDIR /app
 RUN pip3 install -r requirements.txt --no-cache-dir
-COPY . /app
 
+# Instalamos npm junto con las dependencais del 
+# proyecto de Vue.js 
 RUN apk add --no-cache npm
 WORKDIR /app/frontend
 RUN npm install
-# RUN npm run build
 
+# Generamos el contenido estatico del frontend y del 
+# backend, borramos el directorio frontend para liberar
+# espacio.
+RUN npm run build
+WORKDIR /app
+RUN rm -rf /app/frontend
+RUN python manage.py collectstatic --noinput
 
 RUN <<EOF
 addgroup -S docker
@@ -28,7 +37,7 @@ adduser -S --shell /bin/bash --ingroup docker vscode
 EOF
 # install Docker tools (cli, buildx, compose)
 COPY --from=gloursdocker/docker / /
-WORKDIR /app 
-CMD cd frontend && npm run build && cd /app && rm -rf /app/frontend && python manage.py collectstatic --noinput && gunicorn --bind 0.0.0.0:8000 backend.wsgi
 
-# CMD ["manage.py", "runserver", "0.0.0.0:8000"]
+# Iniciamos el servicio de gunicorn. 
+CMD gunicorn --bind 0.0.0.0:8000 backend.wsgi 
+
